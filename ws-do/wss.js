@@ -29,6 +29,4 @@ wss.on('connection', (ws) => {
   });
 });
 
-httpServer.listen(PORT, () =>
-  console.log(`Listening on http://0.0.0.0:${PORT}`)
-);
+httpServer.listen(PORT, () => console.log(`Listening on port ${PORT}`));

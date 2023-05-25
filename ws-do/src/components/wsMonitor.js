@@ -2,8 +2,8 @@ import { useCallback, useState, useEffect } from 'preact/hooks';
 
 const WSMonitor = () => {
   const [wsUrl, setWsUrl] = useState('');
-  const [wsData, setWsData] = useState({});
   const [ws, setWs] = useState(null);
+  const [wsData, setWsData] = useState({});
 
   const onMessage = useCallback(
     async (event) => setWsData(await JSON.parse(event.data)),
@@ -14,7 +14,7 @@ const WSMonitor = () => {
     if (!window) return;
 
     const protocol = window.location.protocol.includes('https') ? 'wss' : 'ws';
-    const url = `${protocol}://${location.hostname}:8081`;
+    const url = `${protocol}://${location.hostname}`;
 
     setWsUrl(url);
   }, []);
@@ -37,7 +37,10 @@ const WSMonitor = () => {
       <input
         type='text'
         value={wsUrl}
-        onChange={(e) => setWsUrl(e.target.value)}
+        onInput={(e) => {
+          console.log(e);
+          setWsUrl(e.target.value);
+        }}
       />
       <div>ws url: {wsUrl}</div>
       <div>rss: {wsData.rss}</div>
