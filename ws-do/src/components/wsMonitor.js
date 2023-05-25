@@ -15,8 +15,11 @@ const WSMonitor = () => {
     const protocol = window.location.protocol.includes('https') ? 'wss' : 'ws';
     const wsUrl = `${protocol}://${location.hostname}:8081`;
 
+    console.log('attempting to connect to', wsUrl);
+
     const wsServer = new WebSocket(wsUrl);
 
+    console.log('ws server:', wsServer);
     wsServer.onmessage = onMessage;
 
     setWs(wsServer);
