@@ -19,24 +19,29 @@ const wss = new WebSocket.WebSocketServer({
 
 wss.on('connection', (ws) => {
   ws.id = uuid.v4();
-  console.log(`new connection! (id ${ws.id}) | ${wss.clients.size} clients`);
+  console.log(`new connection (id ${ws.id}) | ${wss.clients.size} clients`);
 
-  ws.send(JSON.stringify({ type: 'id', id: ws.id }));
+  ws.send(JSON.stringify({ type: 'id', message: ws.id }));
 
   const heartbeatId = setInterval(() => {
-    ws.send(JSON.stringify(process.memoryUsage()), () => null);
+    ws.send(
+      JSON.stringify({ type: 'heartbeat', message: process.memoryUsage() })
+    );
   }, 100);
 
   wss.clients.forEach((client) => {
     if (client !== ws && client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify({ type: 'clientConnected', id: ws.id }));
+      client.send(JSON.stringify({ type: 'clientConnected', message: ws.id }));
     }
   });
 
-  ws.on('message', (data, isBinary) => {
+  ws.on('message', (data, binary) => {
+    const message = binary ? data : data.toString();
     wss.clients.forEach((client) => {
       if (client !== ws && client.readyState === WebSocket.OPEN) {
-        client.send(data, { binary: isBinary });
+        client.send(JSON.stringify({ message, from: ws.id }), {
+          binary,
+        });
       }
     });
   });

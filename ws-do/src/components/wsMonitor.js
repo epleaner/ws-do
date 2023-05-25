@@ -1,16 +1,27 @@
 import { useCallback, useState, useEffect } from 'preact/hooks';
 
 const WSMonitor = () => {
+  const [ws, setWs] = useState(null);
   const [wsInput, setWsInput] = useState('');
   const [wsUrl, setWsUrl] = useState('');
-  const [ws, setWs] = useState(null);
-  const [wsData, setWsData] = useState({});
+
+  const [wsData, setWsData] = useState(null);
+  const [heartbeat, setHeartbeatData] = useState(null);
   const [id, setId] = useState(null);
 
   const onMessage = useCallback(async (event) => {
     const data = await JSON.parse(event.data);
-    if (data.id) setId(data.id);
-    else setWsData(data);
+    console.log(data);
+    switch (data.type) {
+      case 'id':
+        setId(data.message);
+        break;
+      case 'heartbeat':
+        setHeartbeatData(data.message);
+        break;
+      default:
+        setWsData(data);
+    }
   }, []);
 
   useEffect(() => {
@@ -27,13 +38,18 @@ const WSMonitor = () => {
 
     console.log('attempting to connect to', wsUrl);
 
-    const wsServer = new WebSocket(wsUrl);
+    const wsConnection = new WebSocket(wsUrl);
 
-    console.log('ws connection:', wsServer);
-    wsServer.onmessage = onMessage;
+    wsConnection.onmessage = onMessage;
 
-    setWs(wsServer);
+    setWs(wsConnection);
   }, [onMessage, wsUrl]);
+
+  const sendBloop = useCallback(() => {
+    if (!ws) return;
+    let bloop = '1234';
+    ws.send(JSON.stringify({ bloop }));
+  }, [ws]);
 
   return (
     <div>
@@ -41,24 +57,15 @@ const WSMonitor = () => {
         <input
           type='text'
           value={wsInput}
-          onInput={(e) => {
-            console.log(e);
-            setWsInput(e.target.value);
-          }}
+          onInput={(e) => setWsInput(e.target.value)}
         />
         <button onClick={() => setWsUrl(wsInput)}>go</button>
       </div>
-      {id && (
-        <>
-          <div>ws url: {wsUrl}</div>
-          <div>id: {id}</div>
-
-          <div>rss: {wsData.rss}</div>
-          <div>heap total: {wsData.heapTotal}</div>
-          <div>heap used: {wsData.heapUsed}</div>
-          <div>external: {wsData.external}</div>
-        </>
-      )}
+      {wsUrl && <div>ws url: {wsUrl}</div>}
+      {id && <div>id: {id}</div>}
+      {heartbeat && <div>heartbeat: {JSON.stringify(heartbeat)}</div>}
+      {wsData && <div>other data: {JSON.stringify(wsData)}</div>}
+      <button onClick={sendBloop}>bloop</button>
     </div>
   );
 };
