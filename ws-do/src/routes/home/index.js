@@ -1,11 +1,10 @@
-import { h } from 'preact';
 import style from './style.css';
-import WsMonitor from '../../components/wsMonitor';
+import WsClient from '../../components/clients/wsClient';
 
 const Home = () => {
   return (
     <div class={style.home}>
-      <WsMonitor />
+      <WsClient />
     </div>
   );
 };

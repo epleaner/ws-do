@@ -1,16 +1,24 @@
 const express = require('express');
 const path = require('path');
-const { createServer } = require('http');
+const http = require('http');
+const https = require('https');
 
 const WebSocket = require('ws');
 const uuid = require('uuid');
 
 const PORT = process.env.PORT || 8081;
+const HTTPS_PORT = 8443;
+
+const fs = require('fs');
+const key = fs.readFileSync('./key.pem');
+const cert = fs.readFileSync('./cert.pem');
+const credentials = { key, cert };
 
 const app = express();
 app.use(express.static(path.join(__dirname, '/build')));
 
-const httpServer = createServer(app);
+const httpServer = http.createServer(app);
+const httpsServer = https.createServer(credentials, app);
 
 const wss = new WebSocket.WebSocketServer({
   server: httpServer,
@@ -35,7 +43,11 @@ function removeFromChannels(client) {
 function broadcastMessage({ message, sender }) {
   wss.clients.forEach((client) => {
     if (client !== sender && client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify({ message, from: sender.id }));
+      console.log(
+        'broadcasting message',
+        JSON.stringify({ ...message, from: sender.id })
+      );
+      client.send(JSON.stringify({ ...message, from: sender.id }));
     }
   });
 }
@@ -49,7 +61,7 @@ function sendToChannel({ message, channel, sender }) {
       wss.clients.has(client) &&
       client.readyState === WebSocket.OPEN
     ) {
-      client.send(JSON.stringify({ message, channel, from: sender.id }));
+      client.send(JSON.stringify({ ...message, channel, from: sender.id }));
     }
   });
 }
@@ -75,16 +87,14 @@ wss.on('connection', (ws) => {
   ws.id = uuid.v4();
   console.log(`new connection (id ${ws.id}) | ${wss.clients.size} clients`);
 
-  ws.send(JSON.stringify({ type: 'id', message: ws.id }));
+  ws.send(JSON.stringify({ type: 'id', id: ws.id }));
 
   const heartbeatId = setInterval(() => {
-    ws.send(
-      JSON.stringify({ type: 'heartbeat', message: process.memoryUsage() })
-    );
+    ws.send(JSON.stringify({ type: 'heartbeat', data: process.memoryUsage() }));
   }, 100);
 
   broadcastMessage({
-    message: { type: 'clientConnected' },
+    message: { type: 'clientConnected', id: ws.id },
     sender: ws,
   });
 
@@ -92,7 +102,6 @@ wss.on('connection', (ws) => {
     const message = binary ? data : JSON.parse(data);
 
     if (!binary) {
-      console.log(message);
       switch (message.type) {
         case 'joinChannel': {
           addToChannel(message.channel, ws);
@@ -100,7 +109,7 @@ wss.on('connection', (ws) => {
           break;
         }
         case 'broadcast': {
-          broadcastMessage({ message, sender: ws });
+          broadcastMessage({ ...message, sender: ws });
           break;
         }
         case 'myChannels': {
@@ -118,7 +127,7 @@ wss.on('connection', (ws) => {
         }
         default:
           if (message.channel)
-            sendToChannel({ message, channel: message.channel, sender: ws });
+            sendToChannel({ ...message, channel: message.channel, sender: ws });
           else sendToJoinedChannels({ message, sender: ws });
       }
     }
@@ -130,12 +139,19 @@ wss.on('connection', (ws) => {
     removeFromChannels(ws);
 
     broadcastMessage({
-      message: { type: 'clientDisconnected' },
+      type: 'clientDisconnected',
       sender: ws,
+      id: ws.id,
     });
 
     clearInterval(heartbeatId);
   });
 });
 
-httpServer.listen(PORT, () => console.log(`Listening on port ${PORT}`));
+httpServer.listen(PORT, () =>
+  console.log(`HTTP + websocket server listening on port ${PORT}`)
+);
+
+httpsServer.listen(HTTPS_PORT, () =>
+  console.log(`HTTPS server listening on port ${HTTPS_PORT}`)
+);

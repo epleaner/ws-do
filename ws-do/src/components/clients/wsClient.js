@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect, useMemo } from 'preact/hooks';
 
-const WSMonitor = () => {
+const WsClient = () => {
   const [ws, setWs] = useState(null);
   const [wsUrl, setWsUrl] = useState('');
 
@@ -102,11 +102,11 @@ const WSMonitor = () => {
       default:
         return 'unknown';
     }
-  }, [ws, ws?.readyState]);
+  }, [ws]);
 
   useEffect(() => {
     if (wsState === 'open') getChannels();
-  }, [ws, wsState]);
+  }, [getChannels, ws, wsState]);
 
   const handleWsUrlChange = useCallback((e) => {
     e.preventDefault();
@@ -162,4 +162,4 @@ const WSMonitor = () => {
   );
 };
 
-export default WSMonitor;
+export default WsClient;
