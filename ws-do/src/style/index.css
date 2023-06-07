@@ -41,3 +41,19 @@ body {
     margin: 0 2rem;
   }
 }
+
+input {
+  @apply px-2 rounded transition-colors bg-slate-700/50;
+}
+
+button {
+  @apply border border-slate-700 px-2 rounded transition-colors;
+}
+
+button:hover {
+  @apply border-slate-600;
+}
+
+button:active {
+  @apply border-slate-600/50;
+}
