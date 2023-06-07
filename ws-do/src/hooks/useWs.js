@@ -44,7 +44,7 @@ const useWs = () => {
   }, []);
 
   useEffect(() => {
-    if (!wsUrl.length) return;
+    if (!wsUrl.length || typeof window === 'undefined') return;
 
     console.log('attempting to connect to', wsUrl);
 
