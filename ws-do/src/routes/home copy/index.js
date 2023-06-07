@@ -1,10 +1,10 @@
 import style from './style.css';
-import Monitor from '../../components/clients/monitor';
+import WsClient from '../../components/clients/monitor';
 
 const Home = () => {
   return (
     <div class={style.home}>
-      <Monitor />
+      <WsClient />
     </div>
   );
 };
