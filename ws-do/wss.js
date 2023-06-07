@@ -1,7 +1,6 @@
 const express = require('express');
 const path = require('path');
 const http = require('http');
-const https = require('https');
 
 const WebSocket = require('ws');
 const uuid = require('uuid');
@@ -9,16 +8,29 @@ const uuid = require('uuid');
 const PORT = process.env.PORT || 8081;
 const HTTPS_PORT = 8443;
 
-const fs = require('fs');
-const key = fs.readFileSync('./key.pem');
-const cert = fs.readFileSync('./cert.pem');
-const credentials = { key, cert };
+const env = process.env.NODE_ENV || 'development';
 
 const app = express();
 app.use(express.static(path.join(__dirname, '/build')));
 
 const httpServer = http.createServer(app);
-const httpsServer = https.createServer(credentials, app);
+httpServer.listen(PORT, () =>
+  console.log(`HTTP + websocket server listening on port ${PORT}`)
+);
+
+if (env === 'development') {
+  const https = require('https');
+  const fs = require('fs');
+
+  const key = fs.readFileSync('./key.pem');
+  const cert = fs.readFileSync('./cert.pem');
+  const credentials = { key, cert };
+
+  const httpsServer = https.createServer(credentials, app);
+  httpsServer.listen(HTTPS_PORT, () =>
+    console.log(`HTTPS server listening on port ${HTTPS_PORT}`)
+  );
+}
 
 const wss = new WebSocket.WebSocketServer({
   server: httpServer,
@@ -147,11 +159,3 @@ wss.on('connection', (ws) => {
     clearInterval(heartbeatId);
   });
 });
-
-httpServer.listen(PORT, () =>
-  console.log(`HTTP + websocket server listening on port ${PORT}`)
-);
-
-httpsServer.listen(HTTPS_PORT, () =>
-  console.log(`HTTPS server listening on port ${HTTPS_PORT}`)
-);
