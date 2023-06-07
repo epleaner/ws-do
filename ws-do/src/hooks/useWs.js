@@ -60,6 +60,8 @@ const useWs = () => {
   }, [ws]);
 
   const wsState = useMemo(() => {
+    if (typeof window === 'undefined') return;
+
     switch (ws?.readyState) {
       case WebSocket.CONNECTING:
         return 'connecting';
