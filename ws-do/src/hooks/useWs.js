@@ -96,7 +96,7 @@ const useWs = () => {
       ws?.send(
         JSON.stringify({
           type: 'broadcast',
-          message: { ...JSON.parse(message), now: Date.now() },
+          message: { ...JSON.parse(message), timestamp: Date.now() },
         })
       ),
     [ws, wsState]
@@ -108,7 +108,7 @@ const useWs = () => {
       ws?.send(
         JSON.stringify({
           ...JSON.parse(message),
-          now: Date.now(),
+          timestamp: Date.now(),
           channel,
         })
       ),

@@ -22,7 +22,7 @@ const WsClient = () => {
       ws?.send(
         JSON.stringify({
           type: 'bloop',
-          now: Date.now(),
+          timestamp: Date.now(),
           channel: e.target.channel.value,
         })
       );
@@ -31,7 +31,7 @@ const WsClient = () => {
   );
 
   const bloopChannels = useCallback(
-    () => ws?.send(JSON.stringify({ type: 'bloop', now: Date.now() })),
+    () => ws?.send(JSON.stringify({ type: 'bloop', timestamp: Date.now() })),
     [ws]
   );
 
@@ -40,7 +40,7 @@ const WsClient = () => {
       ws?.send(
         JSON.stringify({
           type: 'broadcast',
-          message: { type: 'bloop', now: Date.now() },
+          message: { type: 'bloop', timestamp: Date.now() },
         })
       ),
     [ws]
