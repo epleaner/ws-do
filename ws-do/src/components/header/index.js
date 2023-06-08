@@ -10,6 +10,11 @@ const Header = () => (
       className='hover:bg-slate-700 transition-colors h-full flex items-center px-4'>
       <h1>synth</h1>
     </a>
+    <a
+      href='/midi'
+      className='hover:bg-slate-700 transition-colors h-full flex items-center px-4'>
+      <h1>midi</h1>
+    </a>
   </header>
 );
 

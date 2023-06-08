@@ -1,5 +1,7 @@
 import { useCallback, useState, useEffect, useMemo } from 'preact/hooks';
 
+// SEND TO CHANNEL IS BROKEN
+
 const useWs = () => {
   const [ws, setWs] = useState(null);
   const [wsUrl, setWsUrl] = useState('');

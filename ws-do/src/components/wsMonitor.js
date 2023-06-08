@@ -30,29 +30,6 @@ const WsMonitor = ({ websocket }) => {
     return true;
   }, [message]);
 
-  const bloopChannel = useCallback(
-    (e) => {
-      e.preventDefault();
-      sendMessageToTargetChannel(
-        JSON.stringify({
-          type: 'bloop',
-          channel: e.target.channel.value,
-        })
-      );
-    },
-    [sendMessageToTargetChannel]
-  );
-
-  const bloopChannels = useCallback(
-    () => sendMessageToJoinedChannels(JSON.stringify({ type: 'bloop' })),
-    [sendMessageToJoinedChannels]
-  );
-
-  const broadcastBloop = useCallback(
-    () => broadcastMessage(JSON.stringify({ type: 'bloop' })),
-    [broadcastMessage]
-  );
-
   const handleWsUrlChange = useCallback(
     (e) => {
       e.preventDefault();
@@ -62,34 +39,39 @@ const WsMonitor = ({ websocket }) => {
   );
 
   return (
-    <div>
-      <div>state: {wsState}</div>
-      <form onSubmit={handleWsUrlChange}>
-        <input type='text' name='wsUrl' placeholder={wsUrl} />
-        <button type='submit'>go</button>
-      </form>
+    <div className='flex flex-col gap-4'>
+      <div className='flex gap-8'>
+        <div>{wsState}</div>
+        {ws && wsUrl && <div>connected to: {wsUrl}</div>}
+        <form onSubmit={handleWsUrlChange}>
+          <input type='text' name='wsUrl' placeholder={wsUrl} />
+          <button type='submit'>go</button>
+        </form>
+      </div>
 
       {ws && (
         <>
-          {wsUrl && <div>connected to: {wsUrl}</div>}
-          {id && <div>id: {id}</div>}
-          {heartbeat && <div>heartbeat: {JSON.stringify(heartbeat)}</div>}
-          <form onSubmit={joinChannel}>
-            <input type='text' name='channel' />
-            <button type='submit'>join channel</button>
-          </form>
-          <div>my channels: {JSON.stringify(myChannels)}</div>
-          <div>available channels: {JSON.stringify(availableChannels)}</div>
-          <form onSubmit={bloopChannel}>
-            <input type='text' name='channel' />
-            <button type='submit'>bloop channel</button>
-          </form>
-          <button onClick={getChannels}>get channels</button>
-          <button onClick={bloopChannels}>bloop my channels</button>
-          <button onClick={broadcastBloop}>broadcast bloop</button>
+          <div>
+            {id && <div>id: {id}</div>}
+            {heartbeat && <div>heartbeat: {JSON.stringify(heartbeat)}</div>}
+          </div>
 
           <div>
-            <div>
+            <div className='flex flex-row gap-8'>
+              <button onClick={getChannels}>get channels</button>
+              <form onSubmit={joinChannel}>
+                <input type='text' name='channel' />
+                <button type='submit' className='ml-2'>
+                  join channel
+                </button>
+              </form>
+            </div>
+            <div>my channels: {JSON.stringify(myChannels)}</div>
+            <div>available channels: {JSON.stringify(availableChannels)}</div>
+          </div>
+
+          <div>
+            <div className='flex flex-col gap-1'>
               <div>
                 <label htmlFor='message'>message</label>
                 <textarea
@@ -110,19 +92,25 @@ const WsMonitor = ({ websocket }) => {
                   onInput={(e) => setTargetChannel(e.target.value)}
                 />
               </div>
-              <button
-                disabled={!messageIsValidJSON}
-                onClick={() =>
-                  sendMessageToTargetChannel(message, targetChannel)
-                }>
-                send to channel
-              </button>
-              <button
-                disabled={!messageIsValidJSON}
-                onClick={() => broadcastMessage(message)}>
-                broadcast
-              </button>
-              {}
+              <div>
+                <button
+                  disabled={!messageIsValidJSON}
+                  onClick={() =>
+                    sendMessageToTargetChannel(message, targetChannel)
+                  }>
+                  send to channel
+                </button>
+                <button
+                  disabled={!messageIsValidJSON}
+                  onClick={() => sendMessageToJoinedChannels(message)}>
+                  send to joined channel
+                </button>
+                <button
+                  disabled={!messageIsValidJSON}
+                  onClick={() => broadcastMessage(message)}>
+                  broadcast
+                </button>
+              </div>
             </div>
             {!messageIsValidJSON && message.length ? (
               <div>Invalid JSON</div>

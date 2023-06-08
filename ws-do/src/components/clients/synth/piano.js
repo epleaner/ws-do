@@ -16,7 +16,7 @@ export default function MIDIPiano({ onPlayNote, onStopNote }) {
       playNote={onPlayNote}
       stopNote={onStopNote}
       width={1000}
-      keyboardShortcuts={keyboardShortcuts}
+      // keyboardShortcuts={keyboardShortcuts}
     />
   );
 }

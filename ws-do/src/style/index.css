@@ -58,3 +58,11 @@ button:hover {
 button:active {
   @apply border-slate-600/50;
 }
+
+button:disabled {
+  @apply cursor-not-allowed;
+}
+
+label {
+  @apply mr-2;
+}

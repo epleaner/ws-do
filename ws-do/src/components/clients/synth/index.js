@@ -61,9 +61,7 @@ const SynthClient = () => {
 
       <div className='mb-2'>
         <div>
-          <label className='mr-2' htmlFor='mute'>
-            mute incoming notes
-          </label>
+          <label htmlFor='mute'>mute incoming notes</label>
           <input
             name={'mute incoming'}
             type='checkbox'
@@ -72,9 +70,7 @@ const SynthClient = () => {
           />
         </div>
         <div>
-          <label className='mr-2' htmlFor='mute'>
-            mute outgoing notes
-          </label>
+          <label htmlFor='mute'>mute outgoing notes</label>
           <input
             name={'mute outgoing'}
             type='checkbox'
@@ -83,9 +79,7 @@ const SynthClient = () => {
           />
         </div>
         <div>
-          <label className='mr-2' htmlFor='broadcastNotes'>
-            broadcast notes
-          </label>
+          <label htmlFor='broadcastNotes'>broadcast notes</label>
           <input
             name={'broadcastNotes'}
             type='checkbox'
