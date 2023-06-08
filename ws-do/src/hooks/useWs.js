@@ -90,6 +90,31 @@ const useWs = () => {
     [ws]
   );
 
+  const broadcastMessage = useCallback(
+    (message) =>
+      wsState === 'open' &&
+      ws?.send(
+        JSON.stringify({
+          type: 'broadcast',
+          message: { ...JSON.parse(message), now: Date.now() },
+        })
+      ),
+    [ws, wsState]
+  );
+
+  const sendMessageToTargetChannel = useCallback(
+    (message, channel) =>
+      wsState === 'open' &&
+      ws?.send(
+        JSON.stringify({
+          ...JSON.parse(message),
+          now: Date.now(),
+          channel,
+        })
+      ),
+    [ws, wsState]
+  );
+
   return {
     ws,
     wsUrl,
@@ -103,6 +128,8 @@ const useWs = () => {
     joinChannel,
     getChannels,
     heartbeat,
+    broadcastMessage,
+    sendMessageToTargetChannel,
   };
 };
 

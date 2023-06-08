@@ -42,7 +42,8 @@ body {
   }
 }
 
-input {
+input,
+textarea {
   @apply px-2 rounded transition-colors bg-slate-700/50;
 }
 

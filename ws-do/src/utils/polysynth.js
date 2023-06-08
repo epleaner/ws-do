@@ -5,23 +5,31 @@ export class PolySynth {
     this.voices = [];
   }
 
-  playNote(note, velocity) {
-    // Create a voice for the note
-    const voice = new Voice(this.audioContext, note, velocity);
-    this.voices.push(voice);
+  playNote(note, velocity = 127) {
+    try {
+      // Create a voice for the note
+      const voice = new Voice(this.audioContext, note, velocity);
+      this.voices.push(voice);
 
-    // Start the voice
-    voice.start();
+      // Start the voice
+      voice.start();
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   stopNote(note) {
-    // Find the voice playing the note
-    const voice = this.voices.find((voice) => voice.note === note);
+    try {
+      // Find the voice playing the note
+      const voice = this.voices.find((voice) => voice.note === note);
 
-    if (voice) {
-      // Stop and remove the voice
-      voice.stop();
-      this.voices = this.voices.filter((v) => v !== voice);
+      if (voice) {
+        // Stop and remove the voice
+        voice.stop();
+        this.voices = this.voices.filter((v) => v !== voice);
+      }
+    } catch (e) {
+      console.log(e);
     }
   }
 }
