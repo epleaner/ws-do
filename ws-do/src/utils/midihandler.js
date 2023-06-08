@@ -2,7 +2,9 @@ export class MIDIHandler {
   constructor(synth) {
     console.log('Midihandler constructor', navigator);
     // Request access to Web MIDI API
-    navigator.requestMIDIAccess().then(this.onMIDISuccess, this.onMIDIFailure);
+    navigator
+      .requestMIDIAccess()
+      .then(this.onMIDISuccess.bind(this), this.onMIDIFailure.bind(this));
     this.synth = synth;
   }
 
