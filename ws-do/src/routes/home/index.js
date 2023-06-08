@@ -1,10 +1,10 @@
 import style from './style.css';
-import Monitor from '../../components/clients/monitor';
+import Basic from '../../components/clients/basic';
 
 const Home = () => {
   return (
     <div class={style.home}>
-      <Monitor />
+      <Basic />
     </div>
   );
 };

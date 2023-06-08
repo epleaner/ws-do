@@ -115,6 +115,15 @@ const useWs = () => {
     [ws, wsState]
   );
 
+  const sendMessageToJoinedChannels = useCallback(
+    (message) =>
+      wsState === 'open' &&
+      ws?.send(
+        JSON.stringify({ ...JSON.parse(message), timestamp: Date.now() })
+      ),
+    [ws, wsState]
+  );
+
   return {
     ws,
     wsUrl,
@@ -130,6 +139,7 @@ const useWs = () => {
     heartbeat,
     broadcastMessage,
     sendMessageToTargetChannel,
+    sendMessageToJoinedChannels,
   };
 };
 

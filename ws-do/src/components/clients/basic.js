@@ -1,4 +1,4 @@
-import { useCallback } from 'preact/hooks';
+import { useCallback, useMemo, useState } from 'preact/hooks';
 import useWs from '../../hooks/useWs';
 
 const WsClient = () => {
@@ -14,36 +14,44 @@ const WsClient = () => {
     joinChannel,
     getChannels,
     heartbeat,
+    broadcastMessage,
+    sendMessageToTargetChannel,
+    sendMessageToJoinedChannels,
   } = useWs();
+
+  const [message, setMessage] = useState('');
+  const [targetChannel, setTargetChannel] = useState('');
+
+  const messageIsValidJSON = useMemo(() => {
+    try {
+      JSON.parse(message);
+    } catch (e) {
+      return false;
+    }
+    return true;
+  }, [message]);
 
   const bloopChannel = useCallback(
     (e) => {
       e.preventDefault();
-      ws?.send(
+      sendMessageToTargetChannel(
         JSON.stringify({
           type: 'bloop',
-          timestamp: Date.now(),
           channel: e.target.channel.value,
         })
       );
     },
-    [ws]
+    [sendMessageToTargetChannel]
   );
 
   const bloopChannels = useCallback(
-    () => ws?.send(JSON.stringify({ type: 'bloop', timestamp: Date.now() })),
-    [ws]
+    () => sendMessageToJoinedChannels(JSON.stringify({ type: 'bloop' })),
+    [sendMessageToJoinedChannels]
   );
 
   const broadcastBloop = useCallback(
-    () =>
-      ws?.send(
-        JSON.stringify({
-          type: 'broadcast',
-          message: { type: 'bloop', timestamp: Date.now() },
-        })
-      ),
-    [ws]
+    () => broadcastMessage(JSON.stringify({ type: 'bloop' })),
+    [broadcastMessage]
   );
 
   const handleWsUrlChange = useCallback(
@@ -80,6 +88,49 @@ const WsClient = () => {
           <button onClick={getChannels}>get channels</button>
           <button onClick={bloopChannels}>bloop my channels</button>
           <button onClick={broadcastBloop}>broadcast bloop</button>
+
+          <div>
+            <div>
+              <div>
+                <label htmlFor='message'>message</label>
+                <textarea
+                  cols={100}
+                  rows={1}
+                  name='message'
+                  placeholder={`{"hello": 1}`}
+                  value={message}
+                  onInput={(e) => setMessage(e.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor='targetChannel'>target channel</label>
+                <input
+                  name='targetChannel'
+                  type='text'
+                  value={targetChannel}
+                  onInput={(e) => setTargetChannel(e.target.value)}
+                />
+              </div>
+              <button
+                disabled={!messageIsValidJSON}
+                onClick={() =>
+                  sendMessageToTargetChannel(message, targetChannel)
+                }>
+                send to channel
+              </button>
+              <button
+                disabled={!messageIsValidJSON}
+                onClick={() => broadcastMessage(message)}>
+                broadcast
+              </button>
+              {}
+            </div>
+            {!messageIsValidJSON && message.length ? (
+              <div>Invalid JSON</div>
+            ) : (
+              <></>
+            )}
+          </div>
 
           <div>incoming messages:</div>
           <div style={{ overflow: 'scroll', height: '200px' }}>
