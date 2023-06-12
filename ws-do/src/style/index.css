@@ -13,11 +13,8 @@
   background: #fafafa;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #fff;
-    background: #1c1c1c;
-  }
+:root {
+  @apply text-white bg-zinc-900;
 }
 
 body {

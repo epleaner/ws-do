@@ -2,6 +2,11 @@ const path = require('path');
 const Max = require('max-api');
 const WebSocket = require('ws');
 
+const digitalOceanConfig = {
+  protocol: 'wss',
+  host: 'ws-do-fp9an.ondigitalocean.app/',
+  wsPort: '',
+};
 const localConfig = {
   protocol: 'ws',
   host: 'localhost',
@@ -9,6 +14,7 @@ const localConfig = {
 };
 
 const { protocol, host, wsPort } = localConfig;
+// const { protocol, host, wsPort } = digitalOceanConfig;
 
 const wsUrl = `${protocol}://${host}:${wsPort}`;
 
@@ -16,8 +22,6 @@ console.log('Attempting to establish ws connection');
 
 let ws;
 let restartInterval = 5000;
-
-let coordinates = {};
 
 const connect = () => {
   ws = new WebSocket(wsUrl);
