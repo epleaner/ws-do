@@ -87,7 +87,6 @@ function broadcastMessage({ message, sender }) {
 function sendToClient({ message, targetId, sender }) {
   for (const c of wss.clients) {
     if (c.id === targetId) {
-      console.log('sendToClient', targetId, c);
       if (c && c !== sender && c.readyState === WebSocket.OPEN) {
         c.send(
           JSON.stringify({ ...message, from: sender.id, directMessage: true })
