@@ -113,7 +113,9 @@ wss.on('connection', (ws, req) => {
   ws.send(JSON.stringify({ type: 'id', id: ws.id }));
 
   const heartbeatId = setInterval(() => {
-    ws.send(JSON.stringify({ type: 'heartbeat', data: process.memoryUsage() }));
+    ws.send(
+      JSON.stringify({ type: 'heartbeat', heartbeat: process.memoryUsage() })
+    );
   }, 100);
 
   broadcastMessage({
