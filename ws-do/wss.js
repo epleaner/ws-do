@@ -175,7 +175,7 @@ wss.on('connection', (ws, req) => {
         }
         default:
           if (message.channel)
-            sendToChannel({ ...message, channel: message.channel, sender: ws });
+            sendToChannel({ message, channel: message.channel, sender: ws });
           else sendToJoinedChannels({ message, sender: ws });
       }
     }

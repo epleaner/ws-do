@@ -105,24 +105,26 @@ const useWs = () => {
   );
 
   const sendMessageToTargetChannel = useCallback(
-    (message, channel) =>
+    (message, channel) => {
       wsState === 'open' &&
-      ws?.send(
-        JSON.stringify({
-          ...JSON.parse(message),
-          timestamp: Date.now(),
-          channel,
-        })
-      ),
+        ws?.send(
+          JSON.stringify({
+            ...JSON.parse(message),
+            timestamp: Date.now(),
+            channel,
+          })
+        );
+    },
     [ws, wsState]
   );
 
   const sendMessageToJoinedChannels = useCallback(
-    (message) =>
+    (message) => {
       wsState === 'open' &&
-      ws?.send(
-        JSON.stringify({ ...JSON.parse(message), timestamp: Date.now() })
-      ),
+        ws?.send(
+          JSON.stringify({ ...JSON.parse(message), timestamp: Date.now() })
+        );
+    },
     [ws, wsState]
   );
 

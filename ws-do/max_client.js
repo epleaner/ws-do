@@ -81,6 +81,11 @@ Max.addHandler('noteout', (...msg) => {
   sendMessage({ type: 'broadcast', message: { type: 'noteOut', data: msg } });
 });
 
+Max.addHandler('osc', (...msg) => {
+  console.log('osc', msg);
+  sendMessage({ type: 'broadcast', message: { type: 'osc', data: msg } });
+});
+
 Max.addHandler('list', (...msg) => {
   Max.post('list', msg);
 
