@@ -171,10 +171,7 @@ wss.on('connection', (ws, req) => {
   if (params.channels) {
     const channels = params.channels.split(',');
     channels.forEach((channel) => addToChannel(channel, ws));
-    sendJoinedChannels(ws);
   }
-
-  sendAvailableChannels(ws);
 
   ws.on('message', (data, binary) => {
     const message = binary ? data : JSON.parse(data);
@@ -224,6 +221,8 @@ wss.on('connection', (ws, req) => {
 
     clearInterval(heartbeatId);
   });
+
+  wss.clients.forEach(sendChannelMembershipUpdates);
 });
 
 if (Max) Max.outlet('wss_ready');

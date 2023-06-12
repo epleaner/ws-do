@@ -40,7 +40,7 @@ const useWs = () => {
 
     const protocol = window.location.protocol.includes('https') ? 'wss' : 'ws';
     const port = window.location.protocol.includes('https') ? '' : ':8081';
-    const url = `${protocol}://${location.hostname}${port}`;
+    const url = `${protocol}://${location.hostname}${port}?channels=welcome`;
 
     setWsUrl(url);
   }, []);
@@ -120,6 +120,7 @@ const useWs = () => {
 
   const sendMessageToTargetClient = useCallback(
     (message, targetId) => {
+      console.log('sending to target it', message, targetId);
       wsState === 'open' &&
         ws?.send(
           JSON.stringify({

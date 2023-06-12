@@ -8,7 +8,12 @@ import Monitor from '../../wsMonitor';
 const SynthClient = () => {
   const ws = useWs();
 
-  const { incomingMessage, broadcastMessage } = ws;
+  const {
+    incomingMessage,
+    broadcastMessage,
+    myChannels,
+    sendMessageToTargetClient,
+  } = ws;
 
   const [polySynth, setPolySynth] = useState(null);
   const [muteIncoming, setMuteIncoming] = useState(false);
@@ -56,6 +61,57 @@ const SynthClient = () => {
     [broadcastMessage, broadcastNotes, polySynth]
   );
 
+  const [sequencerIntervalId, setSequencerIntervalId] = useState(null);
+
+  const handleSequenceChannel = useCallback(
+    (channelName) => {
+      if (!channelName.length) return;
+
+      if (sequencerIntervalId) clearInterval(sequencerIntervalId);
+      console.log('setting new interval id');
+
+      let sequenceTarget;
+
+      setSequencerIntervalId(
+        setInterval(() => {
+          const targetChannel = myChannels.find(
+            (c) => c.channel === channelName
+          );
+          if (!targetChannel) return;
+          console.log('targetChannel', targetChannel);
+
+          const members = targetChannel.members.filter((m) => m !== ws.id);
+          if (!members.length) return;
+          console.log('members', members);
+
+          sequenceTarget = sequenceTarget
+            ? members[
+                (members.findIndex((m) => m === sequenceTarget) + 1) %
+                  members.length
+              ]
+            : members[0];
+
+          console.log('sequencing', members, sequenceTarget);
+
+          sendMessageToTargetClient(
+            JSON.stringify({ type: 'playNote', noteData: [69] }),
+            sequenceTarget
+          );
+
+          setTimeout(() => {
+            sendMessageToTargetClient(
+              JSON.stringify({ type: 'stopNote', noteData: [69] }),
+              sequenceTarget
+            );
+          }, 100);
+        }, 500)
+      );
+
+      return () => clearInterval(sequencerIntervalId);
+    },
+    [myChannels, sendMessageToTargetClient, sequencerIntervalId, ws.id]
+  );
+
   return (
     <div>
       <Monitor websocket={ws} />
@@ -88,6 +144,20 @@ const SynthClient = () => {
             onChange={() => setBroadcastNotes(!broadcastNotes)}
           />
         </div>
+      </div>
+      <div className='flex flex-row gap-2 mb-2'>
+        <span>sequence to channel</span>
+        <select
+          className='px-1'
+          name='channel'
+          onChange={(e) => handleSequenceChannel(e.target.value)}>
+          <>
+            <option />
+            {myChannels.map((c) => (
+              <option key={c.channel}>{c.channel}</option>
+            ))}
+          </>
+        </select>
       </div>
       <MIDIPiano onPlayNote={handlePlayNote} onStopNote={handleStopNote} />
     </div>
