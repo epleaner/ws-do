@@ -5,6 +5,8 @@ const http = require('http');
 const WebSocket = require('ws');
 const uuid = require('uuid');
 
+const querystring = require('querystring');
+
 const PORT = process.env.PORT || 8081;
 const HTTPS_PORT = 8443;
 
@@ -95,7 +97,16 @@ function sendJoinedChannels(ws) {
   );
 }
 
-wss.on('connection', (ws) => {
+function sendAllChannels(ws) {
+  ws.send(
+    JSON.stringify({
+      type: 'availableChannels',
+      channels: Object.keys(channels),
+    })
+  );
+}
+
+wss.on('connection', (ws, req) => {
   ws.id = uuid.v4();
   console.log(`new connection (id ${ws.id}) | ${wss.clients.size} clients`);
 
@@ -109,6 +120,20 @@ wss.on('connection', (ws) => {
     message: { type: 'clientConnected', id: ws.id },
     sender: ws,
   });
+
+  let params = {};
+  if (req.url.indexOf('?') !== -1) {
+    const paramString = req.url.split('?')[1];
+    params = querystring.parse(paramString);
+  }
+
+  if (params.channels) {
+    const channels = params.channels.split(',');
+    channels.forEach((channel) => addToChannel(channel, ws));
+    sendJoinedChannels(ws);
+  }
+
+  sendAllChannels(ws);
 
   ws.on('message', (data, binary) => {
     const message = binary ? data : JSON.parse(data);
@@ -129,12 +154,7 @@ wss.on('connection', (ws) => {
           break;
         }
         case 'availableChannels': {
-          ws.send(
-            JSON.stringify({
-              type: 'availableChannels',
-              channels: Object.keys(channels),
-            })
-          );
+          sendAllChannels(ws);
           break;
         }
         default:

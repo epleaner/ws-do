@@ -11,7 +11,6 @@ const MidiClient = () => {
 
   useEffect(() => {
     if (!window || !navigator) return;
-    console.log('??????????');
     setMidiHandler(new MIDIHandler());
   }, []);
 
