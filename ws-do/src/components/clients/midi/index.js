@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'preact/hooks';
 
-import MIDIHandler from '../../../utils/MIDIHandler';
+import MIDIHandler from '../../../utils/midihandler';
 import useWs from '../../../hooks/useWs';
 import Monitor from '../../wsMonitor';
 

@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect } from 'preact/hooks';
 
-import PolySynth from '../../../utils/PolySynth';
+import PolySynth from '../../../utils/polysynth';
 import MIDIPiano from './piano';
 import useWs from '../../../hooks/useWs';
 import Monitor from '../../wsMonitor';
