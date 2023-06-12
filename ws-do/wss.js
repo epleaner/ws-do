@@ -54,33 +54,22 @@ const wss = new WebSocket.WebSocketServer({
 
 const channels = {};
 
-function sendChannelMembers({ channel, target }) {
-  if (!channels[channel]) return;
-
-  target.send(
-    JSON.stringify({
-      type: 'channelMembers',
-      channel,
-      members: channels[channel].map((client) => client.id),
-    })
-  );
+function sendChannelMembershipUpdates(ws) {
+  sendJoinedChannels(ws);
+  sendAvailableChannels(ws);
 }
 
 function addToChannel(channel, client) {
   channels[channel] = channels[channel]?.length
     ? Array.from(new Set([...channels[channel], client]))
     : [client];
-
-  channels[channel].forEach((client) =>
-    sendChannelMembers({ channel, target: client })
-  );
 }
 
 function removeFromChannels(client) {
-  Object.entries(channels).forEach(([channel, clients]) => {
-    channels[channel] = clients.filter((c) => c !== client);
-    sendChannelMembers({ channel, target: client });
-  });
+  Object.entries(channels).forEach(
+    ([channel, clients]) =>
+      (channels[channel] = clients.filter((c) => c !== client))
+  );
 }
 
 function broadcastMessage({ message, sender }) {
@@ -133,9 +122,12 @@ function sendJoinedChannels(ws) {
   ws.send(
     JSON.stringify({
       type: 'myChannels',
-      channels: Object.keys(channels).filter((channel) =>
-        channels[channel].includes(ws)
-      ),
+      channels: Object.keys(channels)
+        .filter((channel) => channels[channel].includes(ws))
+        .map((channel) => ({
+          channel,
+          members: channels[channel].map((c) => c.id),
+        })),
     })
   );
 }
@@ -144,7 +136,10 @@ function sendAvailableChannels(ws) {
   ws.send(
     JSON.stringify({
       type: 'availableChannels',
-      channels: Object.keys(channels),
+      channels: Object.keys(channels).map((channel) => ({
+        channel,
+        members: channels[channel].map((c) => c.id),
+      })),
     })
   );
 }
@@ -188,7 +183,7 @@ wss.on('connection', (ws, req) => {
       switch (message.type) {
         case 'joinChannel': {
           addToChannel(message.channel, ws);
-          sendJoinedChannels(ws);
+          wss.clients.forEach(sendChannelMembershipUpdates);
           break;
         }
         case 'broadcast': {
@@ -198,6 +193,7 @@ wss.on('connection', (ws, req) => {
 
         case 'myChannels': {
           sendJoinedChannels(ws);
+          sendAvailableChannels(ws);
           break;
         }
         case 'availableChannels': {
@@ -223,6 +219,8 @@ wss.on('connection', (ws, req) => {
       type: 'clientDisconnected',
       sender: ws,
     });
+
+    wss.clients.forEach(sendChannelMembershipUpdates);
 
     clearInterval(heartbeatId);
   });

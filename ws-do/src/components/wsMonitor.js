@@ -68,8 +68,25 @@ const WsMonitor = ({ websocket }) => {
                 </button>
               </form>
             </div>
-            <div>my channels: {JSON.stringify(myChannels)}</div>
-            <div>available channels: {JSON.stringify(availableChannels)}</div>
+            <ul>
+              my channels:
+              {myChannels.map(({ channel, members }) => (
+                <li key={channel} className={'ml-2'}>
+                  {channel} | {members.length} members: {members.join(', ')}
+                </li>
+              ))}
+            </ul>
+            <ul>
+              all channels:
+              {availableChannels.map(({ channel, members }) => (
+                <li key={channel} className={'ml-2'}>
+                  {channel}{' '}
+                  {members.length
+                    ? `| ${members.length} members: ${members.join(', ')}`
+                    : '(no members)'}
+                </li>
+              ))}
+            </ul>
           </div>
 
           <div>

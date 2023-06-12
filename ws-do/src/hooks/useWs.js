@@ -27,9 +27,6 @@ const useWs = () => {
       case 'availableChannels':
         setAvailableChannels(data.channels);
         break;
-      case 'channelMembers':
-        console.log('channelMembmers', data);
-        break;
       default:
         setHistory((p) => [data, ...p]);
         break;
