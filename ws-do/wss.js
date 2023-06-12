@@ -1,23 +1,36 @@
 const express = require('express');
 const path = require('path');
 const http = require('http');
-
 const WebSocket = require('ws');
 const uuid = require('uuid');
-
 const querystring = require('querystring');
 
-const PORT = process.env.PORT || 8081;
-const HTTPS_PORT = 8443;
+let sendHeartbeat = false;
+
+let Max;
+
+try {
+  Max = require('max-api');
+  console.log('Max loaded');
+} catch (e) {
+  console.log('No max');
+}
+
+const logger = (message) => {
+  if (Max) Max.post(`wss: ${message}`);
+  console.log(message);
+};
 
 const env = process.env.NODE_ENV || 'development';
+const PORT = process.env.PORT || 8081;
+const HTTPS_PORT = 8443;
 
 const app = express();
 app.use(express.static(path.join(__dirname, '/build')));
 
 const httpServer = http.createServer(app);
 httpServer.listen(PORT, () =>
-  console.log(`HTTP + websocket server listening on port ${PORT}`)
+  logger(`HTTP + websocket server listening on port ${PORT}`)
 );
 
 if (env === 'development') {
@@ -30,7 +43,7 @@ if (env === 'development') {
 
   const httpsServer = https.createServer(credentials, app);
   httpsServer.listen(HTTPS_PORT, () =>
-    console.log(`HTTPS server listening on port ${HTTPS_PORT}`)
+    logger(`HTTPS server listening on port ${HTTPS_PORT}`)
   );
 }
 
@@ -57,7 +70,7 @@ function removeFromChannels(client) {
 function broadcastMessage({ message, sender }) {
   wss.clients.forEach((client) => {
     if (client !== sender && client.readyState === WebSocket.OPEN) {
-      console.log(
+      logger(
         'broadcasting message',
         JSON.stringify({ ...message, from: sender.id })
       );
@@ -108,14 +121,15 @@ function sendAllChannels(ws) {
 
 wss.on('connection', (ws, req) => {
   ws.id = uuid.v4();
-  console.log(`new connection (id ${ws.id}) | ${wss.clients.size} clients`);
+  logger(`new connection (id ${ws.id}) | ${wss.clients.size} clients`);
 
   ws.send(JSON.stringify({ type: 'id', id: ws.id }));
 
   const heartbeatId = setInterval(() => {
-    ws.send(
-      JSON.stringify({ type: 'heartbeat', heartbeat: process.memoryUsage() })
-    );
+    if (sendHeartbeat)
+      ws.send(
+        JSON.stringify({ type: 'heartbeat', heartbeat: process.memoryUsage() })
+      );
   }, 100);
 
   broadcastMessage({
@@ -168,7 +182,7 @@ wss.on('connection', (ws, req) => {
   });
 
   ws.on('close', () => {
-    console.log(`connection closed | ${wss.clients.size} clients`);
+    logger(`connection closed | ${wss.clients.size} clients`);
 
     removeFromChannels(ws);
 
@@ -181,3 +195,5 @@ wss.on('connection', (ws, req) => {
     clearInterval(heartbeatId);
   });
 });
+
+if (Max) Max.outlet('wss_ready');
