@@ -27,6 +27,9 @@ const useWs = () => {
       case 'availableChannels':
         setAvailableChannels(data.channels);
         break;
+      case 'channelMembers':
+        console.log('channelMembmers', data);
+        break;
       default:
         setHistory((p) => [data, ...p]);
         break;
@@ -118,6 +121,20 @@ const useWs = () => {
     [ws, wsState]
   );
 
+  const sendMessageToTargetClient = useCallback(
+    (message, targetId) => {
+      wsState === 'open' &&
+        ws?.send(
+          JSON.stringify({
+            ...JSON.parse(message),
+            timestamp: Date.now(),
+            targetId,
+          })
+        );
+    },
+    [ws, wsState]
+  );
+
   const sendMessageToJoinedChannels = useCallback(
     (message) => {
       wsState === 'open' &&
@@ -142,6 +159,7 @@ const useWs = () => {
     getChannels,
     heartbeat,
     broadcastMessage,
+    sendMessageToTargetClient,
     sendMessageToTargetChannel,
     sendMessageToJoinedChannels,
   };

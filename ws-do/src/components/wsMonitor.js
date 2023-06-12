@@ -14,12 +14,14 @@ const WsMonitor = ({ websocket }) => {
     getChannels,
     heartbeat,
     broadcastMessage,
+    sendMessageToTargetClient,
     sendMessageToTargetChannel,
     sendMessageToJoinedChannels,
   } = websocket;
 
   const [message, setMessage] = useState('');
   const [targetChannel, setTargetChannel] = useState('');
+  const [targetId, setTargetId] = useState('');
 
   const messageIsValidJSON = useMemo(() => {
     try {
@@ -93,6 +95,20 @@ const WsMonitor = ({ websocket }) => {
                 />
               </div>
               <div>
+                <label htmlFor='targetChannel'>target client</label>
+                <input
+                  name='targetId'
+                  type='text'
+                  value={targetId}
+                  onInput={(e) => setTargetId(e.target.value)}
+                />
+              </div>
+              <div>
+                <button
+                  disabled={!messageIsValidJSON}
+                  onClick={() => sendMessageToTargetClient(message, targetId)}>
+                  send to another client
+                </button>
                 <button
                   disabled={!messageIsValidJSON}
                   onClick={() =>

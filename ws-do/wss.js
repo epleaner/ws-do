@@ -16,9 +16,9 @@ try {
   console.log('No max');
 }
 
-const logger = (message) => {
+const logger = (...message) => {
   if (Max) Max.post(`wss: ${message}`);
-  console.log(message);
+  console.log(...message);
 };
 
 const env = process.env.NODE_ENV || 'development';
@@ -54,17 +54,33 @@ const wss = new WebSocket.WebSocketServer({
 
 const channels = {};
 
+function sendChannelMembers({ channel, target }) {
+  if (!channels[channel]) return;
+
+  target.send(
+    JSON.stringify({
+      type: 'channelMembers',
+      channel,
+      members: channels[channel].map((client) => client.id),
+    })
+  );
+}
+
 function addToChannel(channel, client) {
   channels[channel] = channels[channel]?.length
     ? Array.from(new Set([...channels[channel], client]))
     : [client];
+
+  channels[channel].forEach((client) =>
+    sendChannelMembers({ channel, target: client })
+  );
 }
 
 function removeFromChannels(client) {
-  Object.entries(channels).forEach(
-    ([channel, clients]) =>
-      (channels[channel] = clients.filter((c) => c !== client))
-  );
+  Object.entries(channels).forEach(([channel, clients]) => {
+    channels[channel] = clients.filter((c) => c !== client);
+    sendChannelMembers({ channel, target: client });
+  });
 }
 
 function broadcastMessage({ message, sender }) {
@@ -77,6 +93,20 @@ function broadcastMessage({ message, sender }) {
       client.send(JSON.stringify({ ...message, from: sender.id }));
     }
   });
+}
+
+function sendToClient({ message, targetId, sender }) {
+  for (const c of wss.clients) {
+    if (c.id === targetId) {
+      console.log('sendToClient', targetId, c);
+      if (c && c !== sender && c.readyState === WebSocket.OPEN) {
+        c.send(
+          JSON.stringify({ ...message, from: sender.id, directMessage: true })
+        );
+      }
+      break;
+    }
+  }
 }
 
 function sendToChannel({ message, channel, sender }) {
@@ -110,7 +140,7 @@ function sendJoinedChannels(ws) {
   );
 }
 
-function sendAllChannels(ws) {
+function sendAvailableChannels(ws) {
   ws.send(
     JSON.stringify({
       type: 'availableChannels',
@@ -133,7 +163,7 @@ wss.on('connection', (ws, req) => {
   }, 100);
 
   broadcastMessage({
-    message: { type: 'clientConnected', id: ws.id },
+    message: { type: 'clientConnected' },
     sender: ws,
   });
 
@@ -149,7 +179,7 @@ wss.on('connection', (ws, req) => {
     sendJoinedChannels(ws);
   }
 
-  sendAllChannels(ws);
+  sendAvailableChannels(ws);
 
   ws.on('message', (data, binary) => {
     const message = binary ? data : JSON.parse(data);
@@ -165,15 +195,18 @@ wss.on('connection', (ws, req) => {
           broadcastMessage({ ...message, sender: ws });
           break;
         }
+
         case 'myChannels': {
           sendJoinedChannels(ws);
           break;
         }
         case 'availableChannels': {
-          sendAllChannels(ws);
+          sendAvailableChannels(ws);
           break;
         }
         default:
+          if (message.targetId)
+            sendToClient({ message, targetId: message.targetId, sender: ws });
           if (message.channel)
             sendToChannel({ message, channel: message.channel, sender: ws });
           else sendToJoinedChannels({ message, sender: ws });
@@ -189,7 +222,6 @@ wss.on('connection', (ws, req) => {
     broadcastMessage({
       type: 'clientDisconnected',
       sender: ws,
-      id: ws.id,
     });
 
     clearInterval(heartbeatId);
