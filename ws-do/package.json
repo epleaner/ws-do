@@ -4,10 +4,11 @@
   "version": "0.0.0",
   "license": "MIT",
   "engines": {
-    "node": "17.x"
+    "node": "17.9.1"
   },
   "scripts": {
     "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider preact build",
+    "build:do": "yarn install --production=false && yarn build && rm -rf node_modules && yarn install --production --frozen-lockfile",
     "serve": "sirv build --port 8080 --cors --single",
     "dev": "cross-env NODE_OPTIONS=--openssl-legacy-provider preact watch",
     "lint": "eslint src",
