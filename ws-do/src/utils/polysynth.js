@@ -1,4 +1,4 @@
-export class PolySynth {
+export default class PolySynth {
   constructor() {
     this.audioContext = new (window.AudioContext ||
       window.webkitAudioContext)();

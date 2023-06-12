@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect } from 'preact/hooks';
 
-import { PolySynth } from '../../../utils/polysynth';
+import PolySynth from '../../../utils/PolySynth';
 import MIDIPiano from './piano';
 import useWs from '../../../hooks/useWs';
 import Monitor from '../../wsMonitor';
@@ -16,6 +16,7 @@ const SynthClient = () => {
   const [broadcastNotes, setBroadcastNotes] = useState(true);
 
   useEffect(() => {
+    if (!incomingMessage) return;
     switch (incomingMessage.type) {
       case 'playNote':
         if (!muteIncoming) polySynth?.playNote(...incomingMessage.noteData);

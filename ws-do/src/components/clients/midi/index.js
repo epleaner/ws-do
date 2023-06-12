@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'preact/hooks';
 
-import { MIDIHandler } from '../../../utils/midihandler';
+import MIDIHandler from '../../../utils/MIDIHandler';
 import useWs from '../../../hooks/useWs';
 import Monitor from '../../wsMonitor';
 
 const MidiClient = () => {
   const ws = useWs();
 
-  const [midiHandler, setMidiHandler] = useState(null);
+  const [, setMidiHandler] = useState(null);
 
   useEffect(() => {
     if (!window || !navigator) return;

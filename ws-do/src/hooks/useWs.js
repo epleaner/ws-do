@@ -19,7 +19,7 @@ const useWs = () => {
         setId(data.id);
         break;
       case 'heartbeat':
-        setHeartbeat(data.data);
+        setHeartbeat(data.heartbeat);
         break;
       case 'myChannels':
         setMyChannels(data.channels);

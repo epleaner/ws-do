@@ -1,4 +1,4 @@
-export class MIDIHandler {
+export default class MIDIHandler {
   constructor(synth) {
     console.log('Midihandler constructor', navigator);
     // Request access to Web MIDI API
