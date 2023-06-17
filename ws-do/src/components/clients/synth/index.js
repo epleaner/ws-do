@@ -84,27 +84,30 @@ const SynthClient = () => {
           if (!members.length) return;
           console.log('members', members);
 
-          sequenceTarget = sequenceTarget
-            ? members[
-                (members.findIndex((m) => m === sequenceTarget) + 1) %
-                  members.length
-              ]
-            : members[0];
+          const targetIndex = sequenceTarget
+            ? (members.findIndex((m) => m === sequenceTarget) + 1) %
+              members.length
+            : 0;
 
-          console.log('sequencing', members, sequenceTarget);
+          sequenceTarget = sequenceTarget ? members[targetIndex] : members[0];
+
+          console.log('sequencing', members, sequenceTarget, targetIndex);
 
           sendMessageToTargetClient(
-            JSON.stringify({ type: 'playNote', noteData: [69] }),
+            JSON.stringify({ type: 'playNote', noteData: [69 + targetIndex] }),
             sequenceTarget
           );
 
           setTimeout(() => {
             sendMessageToTargetClient(
-              JSON.stringify({ type: 'stopNote', noteData: [69] }),
+              JSON.stringify({
+                type: 'stopNote',
+                noteData: [69 + targetIndex],
+              }),
               sequenceTarget
             );
           }, 100);
-        }, 500)
+        }, 1000)
       );
 
       return () => clearInterval(sequencerIntervalId);

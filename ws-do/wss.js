@@ -55,6 +55,7 @@ const wss = new WebSocket.WebSocketServer({
 const channels = {};
 
 function sendChannelMembershipUpdates(ws) {
+  console.log('sending channel membership updates to', ws.id);
   sendJoinedChannels(ws);
   sendAvailableChannels(ws);
 }
@@ -65,10 +66,13 @@ function addToChannel(channel, client) {
     : [client];
 }
 
+function removeFromChannel(channel, client) {
+  channels[channel] = channels[channel].filter((c) => c !== client);
+}
+
 function removeFromChannels(client) {
-  Object.entries(channels).forEach(
-    ([channel, clients]) =>
-      (channels[channel] = clients.filter((c) => c !== client))
+  Object.entries(channels).forEach(([channel]) =>
+    removeFromChannel(channel, client)
   );
 }
 
@@ -85,13 +89,13 @@ function broadcastMessage({ message, sender }) {
 }
 
 function sendToClient({ message, targetId, sender }) {
+  console.log('sending to client', targetId, message);
+
   for (const c of wss.clients) {
-    if (c.id === targetId) {
-      if (c && c !== sender && c.readyState === WebSocket.OPEN) {
-        c.send(
-          JSON.stringify({ ...message, from: sender.id, directMessage: true })
-        );
-      }
+    if (c.id === targetId && c.readyState === WebSocket.OPEN) {
+      c.send(
+        JSON.stringify({ ...message, from: sender.id, directMessage: true })
+      );
       break;
     }
   }
@@ -105,9 +109,8 @@ function sendToChannel({ message, channel, sender }) {
       client !== sender &&
       wss.clients.has(client) &&
       client.readyState === WebSocket.OPEN
-    ) {
+    )
       client.send(JSON.stringify({ ...message, channel, from: sender.id }));
-    }
   });
 }
 
@@ -118,6 +121,7 @@ function sendToJoinedChannels({ message, sender }) {
 }
 
 function sendJoinedChannels(ws) {
+  console.log('sending joined channels');
   ws.send(
     JSON.stringify({
       type: 'myChannels',
@@ -132,6 +136,7 @@ function sendJoinedChannels(ws) {
 }
 
 function sendAvailableChannels(ws) {
+  console.log('sending available channels');
   ws.send(
     JSON.stringify({
       type: 'availableChannels',
@@ -175,10 +180,17 @@ wss.on('connection', (ws, req) => {
   ws.on('message', (data, binary) => {
     const message = binary ? data : JSON.parse(data);
 
+    console.log('received message', message);
+
     if (!binary) {
       switch (message.type) {
         case 'joinChannel': {
           addToChannel(message.channel, ws);
+          wss.clients.forEach(sendChannelMembershipUpdates);
+          break;
+        }
+        case 'leaveChannel': {
+          removeFromChannel(message.channel, ws);
           wss.clients.forEach(sendChannelMembershipUpdates);
           break;
         }
@@ -197,11 +209,16 @@ wss.on('connection', (ws, req) => {
           break;
         }
         default:
-          if (message.targetId)
+          if (message.targetId) {
             sendToClient({ message, targetId: message.targetId, sender: ws });
-          if (message.channel)
+            break;
+          } else if (message.channel) {
             sendToChannel({ message, channel: message.channel, sender: ws });
-          else sendToJoinedChannels({ message, sender: ws });
+            break;
+          } else {
+            sendToJoinedChannels({ message, sender: ws });
+            break;
+          }
       }
     }
   });

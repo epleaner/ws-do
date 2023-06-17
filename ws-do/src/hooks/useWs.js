@@ -1,7 +1,5 @@
 import { useCallback, useState, useEffect, useMemo } from 'preact/hooks';
 
-// SEND TO CHANNEL IS BROKEN
-
 const useWs = () => {
   const [ws, setWs] = useState(null);
   const [wsUrl, setWsUrl] = useState('');
@@ -120,7 +118,7 @@ const useWs = () => {
 
   const sendMessageToTargetClient = useCallback(
     (message, targetId) => {
-      console.log('sending to target it', message, targetId);
+      console.log('sending to target id', message, targetId);
       wsState === 'open' &&
         ws?.send(
           JSON.stringify({
