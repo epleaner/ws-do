@@ -1,12 +1,12 @@
 node_modules
-/build
-/*.log
+ws-do/build
+ws-do/*.log
 
 *.pem
 
 .DS_Store
 
 # Elastic Beanstalk Files
-.elasticbeanstalk/*
+ws-do/.elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
