@@ -7,6 +7,12 @@
     "node": "18"
   },
   "scripts": {
+    "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider preact build",
+    "build:do": "yarn install --production=false && yarn build && rm -rf node_modules && yarn install --production --frozen-lockfile && cp static/* build",
+    "serve": "sirv build --port 8080 --cors --single",
+    "dev": "cross-env NODE_OPTIONS=--openssl-legacy-provider preact watch",
+    "lint": "eslint src",
+    "test": "jest",
     "start": "node server.js"
   },
   "eslintConfig": {
