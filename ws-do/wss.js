@@ -68,6 +68,7 @@ function addToChannel(channel, client) {
 
 function removeFromChannel(channel, client) {
   channels[channel] = channels[channel].filter((c) => c !== client);
+  if (!channels[channel].length) delete channels[channel];
 }
 
 function removeFromChannels(client) {
