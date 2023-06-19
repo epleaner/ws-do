@@ -24,6 +24,7 @@
       async
       src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"
     ></script>
+    <script src="../utils/WsClient.js"></script>
     <script type="importmap">
       {
         "imports": {
@@ -44,20 +45,15 @@
     <div id="canvas"></div>
 
     <script>
-      const wsUrl = 'ws://localhost:8081';
-      const ws = new WebSocket(wsUrl);
-      ws.onopen = () => {
-        console.log('Websocket established');
-      };
-      ws.onmessage = (e) => {
-        console.log(e.data);
-        const data = JSON.parse(e.data);
-        if (data.type === 'noteOut') {
-          let [note, velocity] = data.data;
-          if (velocity > 0) playSynth(note, velocity);
-          else stopSynth(note);
-        }
-      };
+      const wsClient = new WsClient({
+        handleMessage: (data) => {
+          if (data.type === 'noteOut') {
+            let [note, velocity] = data.data;
+            if (velocity > 0) playSynth(note, velocity);
+            else stopSynth(note);
+          }
+        },
+      });
       //
       //   synth + midi
       //

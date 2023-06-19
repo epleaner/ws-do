@@ -10,7 +10,10 @@ class WsClient {
     this.incomingMessage = '';
     this.handleMessage = handleMessage;
 
+    this.connect = this.connect.bind(this);
+    this.initialize = this.initialize.bind(this);
     this.onMessage = this.onMessage.bind(this);
+    this.onOpen = this.onOpen.bind(this);
     this.getChannels = this.getChannels.bind(this);
     this.joinChannel = this.joinChannel.bind(this);
     this.broadcastMessage = this.broadcastMessage.bind(this);
@@ -19,6 +22,8 @@ class WsClient {
     this.sendMessageToTargetClient = this.sendMessageToTargetClient.bind(this);
     this.sendMessageToJoinedChannels =
       this.sendMessageToJoinedChannels.bind(this);
+
+    this.initialize();
   }
 
   connect(url) {
@@ -26,21 +31,29 @@ class WsClient {
 
     console.log('attempting to connect to', url);
 
-    if (this.ws) this.ws.close();
+    if (this.ws && this.ws.OPEN) this.ws.close();
 
-    this.ws = new WebSocket(this.wsUrl);
-    this.ws.onmessage = this.onMessage;
+    this.ws = new WebSocket(url);
   }
 
   initialize() {
     if (typeof window === 'undefined') return;
 
     const protocol = window.location.protocol.includes('https') ? 'wss' : 'ws';
-    const port = window.location.protocol.includes('https') ? '' : ':8081';
+    const port = window.location.protocol.includes('https') ? '' : ':3000';
     const url = `${protocol}://${location.hostname}${port}?channels=welcome`;
 
     this.wsUrl = url;
-    connect(url);
+
+    this.connect(url);
+
+    this.ws.onmessage = this.onMessage;
+    this.ws.onopen = this.onOpen;
+  }
+
+  onOpen() {
+    console.log('connection opened');
+    this.getChannels();
   }
 
   onMessage(event) {
@@ -143,11 +156,4 @@ class WsClient {
         return 'uninitialized';
     }
   }
-
-  initializeAndConnect() {
-    this.initialize();
-    this.getChannels();
-  }
 }
-
-export default WsClient;

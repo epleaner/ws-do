@@ -34,7 +34,7 @@ if (cluster.isMaster) {
 
   const port = process.env.PORT || 3000;
   const server = app.listen(port, function () {
-    console.log('Server started on port', port);
+    console.log('HTTP/WS server started on port', port);
   });
 
   const wsServer = new WSS({ logger });
@@ -44,4 +44,28 @@ if (cluster.isMaster) {
       wsServer.wss.emit('connection', socket, request);
     });
   });
+
+  const env = process.env.NODE_ENV;
+
+  if (env === 'development') {
+    const https = require('https');
+    const fs = require('fs');
+
+    const key = fs.readFileSync('./key.pem');
+    const cert = fs.readFileSync('./cert.pem');
+    const credentials = { key, cert };
+
+    const httpsPort = process.env.HTTPS_PORT || 3443;
+
+    const httpsServer = https.createServer(credentials, app);
+    httpsServer.listen(httpsPort, () =>
+      logger.log(`HTTPS server started on port`, httpsPort)
+    );
+
+    httpsServer.on('upgrade', (request, socket, head) => {
+      wsServer.wss.handleUpgrade(request, socket, head, (socket) => {
+        wsServer.wss.emit('connection', socket, request);
+      });
+    });
+  }
 }
