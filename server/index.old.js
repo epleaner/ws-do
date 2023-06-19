@@ -1,8 +1,8 @@
 const express = require('express');
 const path = require('path');
 const http = require('http');
-const WebsocketServer = require('./server/WebsocketServer');
-const Logger = require('./server/Logger');
+const WebsocketServer = require('./WebsocketServer');
+const Logger = require('./Logger');
 
 const logger = new Logger();
 

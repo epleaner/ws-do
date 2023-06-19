@@ -8,12 +8,12 @@
   },
   "scripts": {
     "build:preact": "cross-env NODE_OPTIONS=--openssl-legacy-provider preact build",
-    "build": "yarn install --production=false && yarn build:preact && rm -rf node_modules && yarn install --production --frozen-lockfile && cp static/* build",
+    "build": "yarn install --production=false && yarn build:preact && rm -rf node_modules && yarn install --production --frozen-lockfile && cp client/static/* build",
     "serve": "sirv build --port 8080 --cors --single",
     "dev": "cross-env NODE_OPTIONS=--openssl-legacy-provider preact watch",
     "lint": "eslint src",
     "test": "jest",
-    "start": "node app.js"
+    "start": "node server"
   },
   "eslintConfig": {
     "extends": "preact",

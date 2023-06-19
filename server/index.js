@@ -25,8 +25,8 @@ if (cluster.isMaster) {
 } else {
   const express = require('express');
 
-  const WSS = require('./server/WebsocketServer');
-  const Logger = require('./server/Logger');
+  const WSS = require('./WebsocketServer');
+  const Logger = require('./Logger');
   const logger = new Logger();
 
   const app = express();
