@@ -1,51 +1,5 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>MIDI FREQ</title>
-    <style>
-      body {
-        margin: 0;
-        overflow: hidden;
-      }
-      #canvas {
-        width: 100%;
-        height: 100%;
-      }
-      #device-select-container {
-        position: absolute;
-        /* background-color: rgba(255, 255, 255, 0.6); */
-        padding: 40px;
-        font-family: Arial, Helvetica, sans-serif;
-        color: greenyellow;
-      }
-    </style>
 
-    <script
-      async
-      src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"
-    ></script>
-    <script src="../utils/WsClient.js"></script>
-    <script type="importmap">
-      {
-        "imports": {
-          "three": "https://unpkg.com/three@0.153.0/build/three.module.js",
-          "three/addons/": "https://unpkg.com/three@0.153.0/examples/jsm/"
-        }
-      }
-    </script>
-  </head>
-
-  <body>
-    <div id="device-select-container" style="display: none">
-      <p>press shift+space to toggle controls</p>
-      <label for="device-select">Select MIDI Device:</label>
-      <select id="device-select"></select>
-    </div>
-
-    <div id="canvas"></div>
-
-    <script>
-      const wsClient = new WsClient({
+const wsClient = new WsClient({
         handleMessage: (data) => {
           if (data.type === 'noteOut') {
             let [note, velocity] = data.data;
@@ -377,5 +331,3 @@
         camera.updateProjectionMatrix();
       });
     </script>
-  </body>
-</html>
