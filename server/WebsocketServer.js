@@ -4,11 +4,12 @@ const querystring = require('querystring');
 const Logger = require('./Logger');
 
 class WebsocketServer {
-  constructor(httpServer, logger) {
-    this.wss = new WebSocket.WebSocketServer({
-      server: httpServer,
+  constructor({ logger }) {
+    this.wss = new WebSocket.Server({
+      noServer: true,
       clientTracking: true,
     });
+
     this.channels = {};
 
     this.logger = logger || new Logger();

@@ -27,6 +27,8 @@ export default class WebsocketClient {
     try {
       console.log('connecting to', url);
 
+      if (this.ws) this.ws.close();
+
       const connection = new WebSocket(url);
       connection.onmessage = this.onMessage;
       connection.onopen = () => {

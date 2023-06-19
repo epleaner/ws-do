@@ -43,8 +43,11 @@ const WsMonitor = ({ websocket }) => {
   return (
     <div className='flex flex-col gap-4'>
       <div className='flex gap-8'>
-        <div>{wsState}</div>
-        {ws && wsUrl && <div>connected to: {wsUrl}</div>}
+        {ws && wsUrl && (
+          <div>
+            {wsState} on: {wsUrl}
+          </div>
+        )}
         <form onSubmit={handleWsUrlChange}>
           <input type='text' name='wsUrl' placeholder={wsUrl} />
           <button type='submit'>go</button>

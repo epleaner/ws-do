@@ -37,8 +37,8 @@ const useWs = () => {
     if (!window) return;
 
     const protocol = window.location.protocol.includes('https') ? 'wss' : 'ws';
-    const port = window.location.protocol.includes('https') ? '' : ':8081';
-    const url = `${protocol}://${location.hostname}${port}?channels=welcome`;
+    const port = window.location.protocol.includes('https') ? '' : ':3000';
+    let url = `${protocol}://${location.hostname}${port}?channels=welcome`;
 
     setWsUrl(url);
   }, []);
@@ -48,8 +48,13 @@ const useWs = () => {
 
     console.log('attempting to connect to', wsUrl);
 
+    if (ws) ws.close();
+
     const wsConnection = new WebSocket(wsUrl);
     wsConnection.onmessage = onMessage;
+    wsConnection.onopen = () => {
+      console.log('hey were open');
+    };
 
     setWs(wsConnection);
   }, [onMessage, wsUrl]);

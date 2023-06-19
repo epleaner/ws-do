@@ -14,7 +14,7 @@ const app = express();
 app.use(express.static(path.join(__dirname, '/build')));
 
 const httpServer = http.createServer(app);
-new WebsocketServer(httpServer, logger);
+new WebsocketServer(logger);
 
 httpServer.listen(PORT, () =>
   logger.log(`HTTP + websocket server listening on port ${PORT}`)

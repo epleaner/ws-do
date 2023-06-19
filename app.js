@@ -25,26 +25,23 @@ if (cluster.isMaster) {
 } else {
   const express = require('express');
 
+  const WSS = require('./server/WebsocketServer');
+  const Logger = require('./server/Logger');
+  const logger = new Logger();
+
   const app = express();
   app.use(express.static(path.join(__dirname, '/build')));
 
   const port = process.env.PORT || 3000;
   const server = app.listen(port, function () {
-    console.log('Server started at', new Date(Date.now()).toLocaleString());
+    console.log('Server started on port', port);
   });
 
-  const wsServer = new ws.Server({ noServer: true });
-  wsServer.on('connection', (socket) => {
-    console.log('new ws connection');
-    socket.on('message', (message) => {
-      console.log('incoming message');
-      console.log(message);
-    });
-  });
+  const wsServer = new WSS({ logger });
 
   server.on('upgrade', (request, socket, head) => {
-    wsServer.handleUpgrade(request, socket, head, (socket) => {
-      wsServer.emit('connection', socket, request);
+    wsServer.wss.handleUpgrade(request, socket, head, (socket) => {
+      wsServer.wss.emit('connection', socket, request);
     });
   });
 }
