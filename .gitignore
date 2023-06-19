@@ -5,6 +5,8 @@ node_modules
 
 .DS_Store
 
+client/preact-client/build
+
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
