@@ -31,6 +31,7 @@ const connect = () => {
   };
 
   ws.onmessage = (event) => {
+    Max.post(`received: ${event.data}`);
     const data = JSON.parse(event.data);
     Max.outlet(data);
   };
@@ -88,7 +89,7 @@ Max.addHandler('osc', (...msg) => {
 
 Max.addHandler('floatmsg', (f) => {
   console.log('float', f);
-  // sendMessage({ message: { type: 'float', data: f } });
+  sendMessage({ message: { type: 'floatmsg', data: f } });
 });
 
 Max.addHandler('list', (...msg) => {
