@@ -40,6 +40,31 @@
 		"assistshowspatchername" : 0,
 		"boxes" : [ 			{
 				"box" : 				{
+					"id" : "obj-27",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 61.0, 737.0, 101.0, 22.0 ],
+					"text" : "prepend floatmsg"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"format" : 6,
+					"id" : "obj-22",
+					"maxclass" : "flonum",
+					"numinlets" : 1,
+					"numoutlets" : 2,
+					"outlettype" : [ "", "bang" ],
+					"parameter_enable" : 0,
+					"patching_rect" : [ 61.0, 700.5, 50.0, 22.0 ]
+				}
+
+			}
+, 			{
+				"box" : 				{
 					"id" : "obj-17",
 					"maxclass" : "newobj",
 					"numinlets" : 1,
@@ -195,7 +220,7 @@
 					"numinlets" : 1,
 					"numoutlets" : 2,
 					"outlettype" : [ "", "" ],
-					"patching_rect" : [ 787.5, 478.5, 160.0, 22.0 ],
+					"patching_rect" : [ 787.5, 478.5, 161.0, 22.0 ],
 					"saved_object_attributes" : 					{
 						"autostart" : 0,
 						"defer" : 0,
@@ -204,7 +229,7 @@
 						"watch" : 1
 					}
 ,
-					"text" : "node.script wss.js @watch 1"
+					"text" : "node.script server @watch 1"
 				}
 
 			}
@@ -264,8 +289,6 @@
 					"saved_object_attributes" : 					{
 						"autostart" : 0,
 						"defer" : 0,
-						"node_bin_path" : "",
-						"npm_bin_path" : "",
 						"watch" : 1
 					}
 ,
@@ -414,6 +437,13 @@
 			}
 , 			{
 				"patchline" : 				{
+					"destination" : [ "obj-27", 0 ],
+					"source" : [ "obj-22", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
 					"destination" : [ "obj-15", 1 ],
 					"order" : 0,
 					"source" : [ "obj-23", 1 ]
@@ -468,6 +498,13 @@
 			}
 , 			{
 				"patchline" : 				{
+					"destination" : [ "obj-1", 0 ],
+					"source" : [ "obj-27", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
 					"destination" : [ "obj-23", 1 ],
 					"midpoints" : [ 395.0, 376.0, 156.5, 376.0 ],
 					"source" : [ "obj-28", 0 ]
@@ -511,7 +548,7 @@
 			}
 , 			{
 				"name" : "max_client.js",
-				"bootpath" : "~/workspace/ws-do/ws-do",
+				"bootpath" : "~/workspace/ws-do",
 				"patcherrelativepath" : ".",
 				"type" : "TEXT",
 				"implicit" : 1
@@ -533,10 +570,10 @@
 				"implicit" : 1
 			}
 , 			{
-				"name" : "wss.js",
-				"bootpath" : "~/workspace/ws-do/ws-do",
+				"name" : "server",
+				"bootpath" : "~/workspace/ws-do",
 				"patcherrelativepath" : ".",
-				"type" : "TEXT",
+				"type" : "fold",
 				"implicit" : 1
 			}
  ],

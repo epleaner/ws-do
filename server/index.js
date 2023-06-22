@@ -40,7 +40,9 @@ if (cluster.isMaster) {
   const wsServer = new WSS({ logger });
 
   server.on('upgrade', (request, socket, head) => {
+    console.log('????????', request.query);
     wsServer.wss.handleUpgrade(request, socket, head, (socket) => {
+      console.log('!!!!!!!!!!!!!', request.query);
       wsServer.wss.emit('connection', socket, request);
     });
   });
@@ -63,7 +65,9 @@ if (cluster.isMaster) {
     );
 
     httpsServer.on('upgrade', (request, socket, head) => {
+      console.log('????????', request.query);
       wsServer.wss.handleUpgrade(request, socket, head, (socket) => {
+        console.log('!!!!!!!!!!!!!!', request.query);
         wsServer.wss.emit('connection', socket, request);
       });
     });

@@ -29,6 +29,7 @@ class WebsocketServer {
     this.sendJoinedChannels = this.sendJoinedChannels.bind(this);
     this.sendAvailableChannels = this.sendAvailableChannels.bind(this);
     this.initializeHandlers = this.initializeHandlers.bind(this);
+    this.processQueryParams = this.processQueryParams.bind(this);
   }
 
   sendChannelMembershipUpdates(client) {
@@ -127,6 +128,19 @@ class WebsocketServer {
     );
   }
 
+  processQueryParams(url) {
+    let params = {};
+    if (url.indexOf('?') !== -1) {
+      const paramString = req.url.split('?')[1];
+      params = querystring.parse(paramString);
+    }
+
+    if (params.channels) {
+      const channels = params.channels.split(',');
+      channels.forEach((channel) => this.addToChannel(channel, client));
+    }
+  }
+
   initializeHandlers() {
     this.wss.on('connection', (client, req) => {
       client.id = uuid.v4();
@@ -141,16 +155,7 @@ class WebsocketServer {
         sender: client,
       });
 
-      let params = {};
-      if (req.url.indexOf('?') !== -1) {
-        const paramString = req.url.split('?')[1];
-        params = querystring.parse(paramString);
-      }
-
-      if (params.channels) {
-        const channels = params.channels.split(',');
-        channels.forEach((channel) => this.addToChannel(channel, client));
-      }
+      this.processQueryParams(req.url);
 
       client.on('message', (data, binary) => {
         const message = binary ? data : JSON.parse(data);

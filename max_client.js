@@ -2,9 +2,9 @@ const path = require('path');
 const Max = require('max-api');
 const WebSocket = require('ws');
 
-const digitalOceanConfig = {
+const remoteConfig = {
   protocol: 'wss',
-  host: 'ws-do-fp9an.ondigitalocean.app/',
+  host: 'cnmat.io',
   wsPort: '',
 };
 const localConfig = {
@@ -13,10 +13,10 @@ const localConfig = {
   wsPort: '8081',
 };
 
-const { protocol, host, wsPort } = localConfig;
-// const { protocol, host, wsPort } = digitalOceanConfig;
+// const { protocol, host, wsPort } = localConfig;
+const { protocol, host, wsPort } = remoteConfig;
 
-const wsUrl = `${protocol}://${host}:${wsPort}`;
+const wsUrl = `${protocol}://${host}:${wsPort}?channels=max`;
 
 console.log('Attempting to establish ws connection');
 
@@ -84,6 +84,11 @@ Max.addHandler('noteout', (...msg) => {
 Max.addHandler('osc', (...msg) => {
   console.log('osc', msg);
   sendMessage({ type: 'broadcast', message: { type: 'osc', data: msg } });
+});
+
+Max.addHandler('floatmsg', (f) => {
+  console.log('float', f);
+  // sendMessage({ message: { type: 'float', data: f } });
 });
 
 Max.addHandler('list', (...msg) => {
