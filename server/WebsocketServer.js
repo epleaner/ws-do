@@ -131,14 +131,11 @@ class WebsocketServer {
   processQueryParams(url) {
     let params = {};
     if (url.indexOf('?') !== -1) {
-      const paramString = req.url.split('?')[1];
+      const paramString = url.split('?')[1];
       params = querystring.parse(paramString);
     }
 
-    if (params.channels) {
-      const channels = params.channels.split(',');
-      channels.forEach((channel) => this.addToChannel(channel, client));
-    }
+    return params;
   }
 
   initializeHandlers() {
@@ -155,7 +152,12 @@ class WebsocketServer {
         sender: client,
       });
 
-      this.processQueryParams(req.url);
+      const params = this.processQueryParams(req.url);
+
+      if (params.channels) {
+        const channels = params.channels.split(',');
+        channels.forEach((channel) => this.addToChannel(channel, client));
+      }
 
       client.on('message', (data, binary) => {
         const message = binary ? data : JSON.parse(data);
