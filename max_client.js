@@ -74,6 +74,14 @@ Max.addHandler('echo', (msg) => {
   Max.outlet(msg);
 });
 
+Max.addHandler('joinChannel', (...msg) => {
+  sendMessage({ type: 'joinChannel', channel: msg });
+});
+
+Max.addHandler('leaveChannel', (...msg) => {
+  sendMessage({ type: 'leaveChannel', channel: msg });
+});
+
 Max.addHandler('start', () => {
   Max.post('Started');
 });
