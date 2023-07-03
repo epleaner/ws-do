@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 80.0, 166.0, 1066.0, 723.0 ],
+		"rect" : [ 1961.0, 212.0, 1330.0, 847.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -39,6 +39,137 @@
 		"subpatcher_template" : "Default Max 7",
 		"assistshowspatchername" : 0,
 		"boxes" : [ 			{
+				"box" : 				{
+					"id" : "obj-55",
+					"linecount" : 4,
+					"maxclass" : "comment",
+					"numinlets" : 1,
+					"numoutlets" : 0,
+					"patching_rect" : [ 847.0, 701.0, 363.0, 60.0 ],
+					"text" : "1. broadcast: everyone on server\n2. all my channels: everyone on every channel i belong to\n3. one channel: everyone on one channel i belong to\n4. one client on one channel"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-51",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 1001.0, 562.0, 145.0, 22.0 ],
+					"text" : "dict.serialize @mode json"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-48",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 1001.0, 537.5, 75.0, 22.0 ],
+					"text" : "o.dict"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-47",
+					"maxclass" : "comment",
+					"numinlets" : 1,
+					"numoutlets" : 0,
+					"patching_rect" : [ 1001.0, 451.5, 287.0, 20.0 ],
+					"text" : "need some way to index into the channels dict ^"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-45",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 1001.0, 586.0, 125.0, 22.0 ],
+					"text" : "prepend sendToClient"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"fontface" : 0,
+					"id" : "obj-44",
+					"linecount" : 3,
+					"maxclass" : "o.compose",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 1001.0, 486.5, 306.0, 49.0 ],
+					"saved_bundle_data" : [ 35, 98, 117, 110, 100, 108, 101, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 48, 47, 116, 111, 0, 44, 115, 0, 0, 54, 101, 48, 102, 50, 54, 54, 53, 45, 51, 101, 102, 50, 45, 52, 98, 53, 99, 45, 97, 102, 98, 51, 45, 51, 55, 98, 97, 98, 55, 101, 100, 54, 55, 51, 100, 0, 0, 0, 0, 0, 0, 0, 20, 47, 100, 97, 116, 97, 0, 0, 0, 44, 115, 0, 0, 104, 101, 108, 108, 111, 0, 0, 0 ],
+					"saved_bundle_length" : 92,
+					"text" : "/to : \"6e0f2665-3ef2-4b5c-afb3-37bab7ed673d\",\n/data : \"hello\""
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"fontface" : 0,
+					"id" : "obj-41",
+					"linecount" : 12,
+					"maxclass" : "o.compose",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 1001.0, 237.0, 298.0, 164.0 ],
+					"saved_bundle_data" : [  ],
+					"saved_bundle_length" : 0,
+					"text" : "/channels : {\n  /max : [\"6e0f2665-3ef2-4b5c-afb3-37bab7ed673d\", \"a5d26451-dd5f-4be3-8917-c4487a4ad272\", \"e3c8d98b-35b1-44c3-8d88-8fc9823fa5e4\", \"3181c944-9b51-465a-86d2-6ebe1a32e61e\"],\n/another : [\"6e0f2665-3ef2-4b5c-afb3-37bab7ed673d\", \"a5d26451-dd5f-4be3-8917-c4487a4ad272\", \"e3c8d98b-35b1-44c3-8d88-8fc9823fa5e4\", \"3181c944-9b51-465a-86d2-6ebe1a32e61e\"],\n}"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-37",
+					"linecount" : 2,
+					"maxclass" : "message",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 397.5, 659.0, 327.0, 35.0 ],
+					"presentation_linecount" : 3,
+					"text" : ";\rmax launchbrowser https://cnmat.io?channels=max&user=1"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-36",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 946.0, 194.0, 66.0, 22.0 ],
+					"text" : "OSC-route"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-28",
+					"linecount" : 2,
+					"maxclass" : "message",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 839.0, 616.0, 288.0, 35.0 ],
+					"presentation_linecount" : 3,
+					"text" : ";\rmax launchbrowser https://cnmat.io?channels=david"
+				}
+
+			}
+, 			{
 				"box" : 				{
 					"id" : "obj-29",
 					"maxclass" : "message",
@@ -289,7 +420,7 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 440.5, 537.5, 386.0, 97.0 ],
-					"text" : "/channels : {\n  /channel : \"max\",\n  /members : [\"5eac4aa2-f6f1-4cec-825a-25b358368121\", \"a5a5a2fe-66f8-480d-8f9a-298644a213b9\"]\n},\n/type : \"availableChannels\""
+					"text" : "/channels : {\n  /members : [\"a68b6771-2e97-427c-bb99-f709a6dcf4f5\", \"59125290-778e-43eb-83e9-461af437e4c5\"],\n  /channel : \"max\"\n},\n/type : \"availableChannels\""
 				}
 
 			}
@@ -303,7 +434,7 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 440.5, 237.0, 386.0, 97.0 ],
-					"text" : "/channels : {\n  /channel : \"max\",\n  /members : [\"5eac4aa2-f6f1-4cec-825a-25b358368121\", \"a5a5a2fe-66f8-480d-8f9a-298644a213b9\"]\n},\n/type : \"availableChannels\""
+					"text" : "/channels : {\n  /members : [\"a68b6771-2e97-427c-bb99-f709a6dcf4f5\", \"59125290-778e-43eb-83e9-461af437e4c5\"],\n  /channel : \"max\"\n},\n/type : \"availableChannels\""
 				}
 
 			}
@@ -408,8 +539,6 @@
 					"saved_object_attributes" : 					{
 						"autostart" : 0,
 						"defer" : 0,
-						"node_bin_path" : "",
-						"npm_bin_path" : "",
 						"watch" : 1
 					}
 ,
@@ -498,8 +627,6 @@
 					"saved_object_attributes" : 					{
 						"autostart" : 0,
 						"defer" : 0,
-						"node_bin_path" : "",
-						"npm_bin_path" : "",
 						"watch" : 1
 					}
 ,
@@ -712,8 +839,29 @@
 			}
 , 			{
 				"patchline" : 				{
+					"destination" : [ "obj-48", 0 ],
+					"source" : [ "obj-44", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-51", 0 ],
+					"source" : [ "obj-48", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
 					"destination" : [ "obj-11", 0 ],
 					"source" : [ "obj-5", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-45", 0 ],
+					"source" : [ "obj-51", 0 ]
 				}
 
 			}
@@ -747,6 +895,10 @@
 			}
  ],
 		"dependency_cache" : [ 			{
+				"name" : "OSC-route.mxo",
+				"type" : "iLaX"
+			}
+, 			{
 				"name" : "fit_jweb_to_bounds.js",
 				"bootpath" : "C74:/packages/Node for Max/patchers/debug-monitor",
 				"type" : "TEXT",
@@ -764,6 +916,14 @@
 				"bootpath" : "C74:/packages/Node for Max/patchers/debug-monitor",
 				"type" : "JSON",
 				"implicit" : 1
+			}
+, 			{
+				"name" : "o.compose.mxo",
+				"type" : "iLaX"
+			}
+, 			{
+				"name" : "o.dict.mxo",
+				"type" : "iLaX"
 			}
 , 			{
 				"name" : "o.display.mxo",
