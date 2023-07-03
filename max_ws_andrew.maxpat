@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 38.0, 121.0, 1052.0, 762.0 ],
+		"rect" : [ 80.0, 166.0, 1066.0, 723.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -40,6 +40,18 @@
 		"assistshowspatchername" : 0,
 		"boxes" : [ 			{
 				"box" : 				{
+					"id" : "obj-29",
+					"maxclass" : "message",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 926.0, 273.0, 45.0, 22.0 ],
+					"text" : "fromeli"
+				}
+
+			}
+, 			{
+				"box" : 				{
 					"id" : "obj-26",
 					"maxclass" : "message",
 					"numinlets" : 2,
@@ -58,7 +70,6 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 925.0, 88.0, 56.0, 22.0 ],
-					"presentation_linecount" : 3,
 					"text" : "welcome"
 				}
 
@@ -278,7 +289,7 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 440.5, 537.5, 386.0, 97.0 ],
-					"text" : "/message : {\n  /data : -0.088,\n  /type : \"floatmsg\"\n},\n/from : \"b5235933-fe40-4ac1-aadc-2666ec75c8f9\",\n/channel : \"one\""
+					"text" : "/channels : {\n  /channel : \"max\",\n  /members : [\"5eac4aa2-f6f1-4cec-825a-25b358368121\", \"a5a5a2fe-66f8-480d-8f9a-298644a213b9\"]\n},\n/type : \"availableChannels\""
 				}
 
 			}
@@ -292,7 +303,7 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 440.5, 237.0, 386.0, 97.0 ],
-					"text" : "/message : {\n  /data : 0.027,\n  /type : \"floatmsg\"\n},\n/from : \"f42dd40c-36b9-49f9-9e18-7a857c27fb2f\",\n/channel : \"one\""
+					"text" : "/channels : {\n  /channel : \"max\",\n  /members : [\"5eac4aa2-f6f1-4cec-825a-25b358368121\", \"a5a5a2fe-66f8-480d-8f9a-298644a213b9\"]\n},\n/type : \"availableChannels\""
 				}
 
 			}
@@ -397,6 +408,8 @@
 					"saved_object_attributes" : 					{
 						"autostart" : 0,
 						"defer" : 0,
+						"node_bin_path" : "",
+						"npm_bin_path" : "",
 						"watch" : 1
 					}
 ,
@@ -485,6 +498,8 @@
 					"saved_object_attributes" : 					{
 						"autostart" : 0,
 						"defer" : 0,
+						"node_bin_path" : "",
+						"npm_bin_path" : "",
 						"watch" : 1
 					}
 ,
@@ -633,6 +648,13 @@
 				"patchline" : 				{
 					"destination" : [ "obj-1", 0 ],
 					"source" : [ "obj-27", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-19", 0 ],
+					"source" : [ "obj-29", 0 ]
 				}
 
 			}
