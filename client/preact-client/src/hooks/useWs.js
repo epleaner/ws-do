@@ -38,7 +38,11 @@ const useWs = () => {
 
     const protocol = window.location.protocol.includes('https') ? 'wss' : 'ws';
     const port = window.location.protocol.includes('https') ? '' : ':3000';
-    let url = `${protocol}://${location.hostname}${port}?channels=welcome`;
+    const queryParams = new URLSearchParams(window.location.search).toString();
+
+    let url = `${protocol}://${location.hostname}${port}`;
+
+    url = [url, queryParams].join('?');
 
     setWsUrl(url);
   }, []);
