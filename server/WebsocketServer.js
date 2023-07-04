@@ -68,8 +68,6 @@ class WebsocketServer {
   }
 
   sendToClient({ message, targetId, sender }) {
-    this.logger.log('sending to client', targetId, message);
-
     for (const c of this.wss.clients) {
       if (c.id === targetId && c.readyState === WebSocket.OPEN) {
         c.send(
@@ -78,6 +76,22 @@ class WebsocketServer {
         break;
       }
     }
+  }
+
+  sendToClientOnChannel({ message, targetId, channel, sender }) {
+    if (!this.channels[channel]?.includes(sender)) return;
+
+    const targetClient = this.channels[channel].find((c) => c.id === targetId);
+    if (!targetClient) return;
+
+    if (
+      targetClient !== sender &&
+      this.wss.clients.has(targetClient) &&
+      targetClient.readyState === WebSocket.OPEN
+    )
+      targetClient.send(
+        JSON.stringify({ ...message, channel, targetId, from: sender.id })
+      );
   }
 
   sendToChannel({ message, channel, sender }) {
@@ -192,11 +206,19 @@ class WebsocketServer {
             }
             default:
               if (message.targetId) {
-                this.sendToClient({
-                  message,
-                  targetId: message.targetId,
-                  sender: client,
-                });
+                if (message.channel) {
+                  this.sendToClientOnChannel({
+                    message,
+                    targetId: message.targetId,
+                    channel: message.channel,
+                    sender: client,
+                  });
+                } else
+                  this.sendToClient({
+                    message,
+                    targetId: message.targetId,
+                    sender: client,
+                  });
                 break;
               } else if (message.channel) {
                 this.sendToChannel({
