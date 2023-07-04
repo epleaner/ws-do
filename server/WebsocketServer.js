@@ -35,7 +35,6 @@ class WebsocketServer {
   sendChannelMembershipUpdates(client) {
     this.logger.log('sending channel membership updates to', client.id);
     this.sendJoinedChannels(client);
-    this.sendAvailableChannels(client);
   }
 
   addToChannel(channel, client) {
@@ -195,10 +194,8 @@ class WebsocketServer {
                 this.broadcastMessage({ ...message, sender: client });
                 break;
               }
-
               case 'myChannels': {
                 this.sendJoinedChannels(client);
-                this.sendAvailableChannels(client);
                 break;
               }
               case 'availableChannels': {
