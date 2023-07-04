@@ -4,7 +4,7 @@ class WsClient {
     this.wsUrl = '';
     this.history = [];
     this.heartbeat = null;
-    this.myChannels = [];
+    this.joinedChannels = [];
     this.availableChannels = [];
     this.id = null;
     this.incomingMessage = '';
@@ -29,8 +29,8 @@ class WsClient {
       case 'heartbeat':
         this.heartbeat = data.heartbeat;
         break;
-      case 'myChannels':
-        this.myChannels = data.channels;
+      case 'joinedChannels':
+        this.joinedChannels = data.channels;
         break;
       case 'availableChannels':
         this.availableChannels = data.channels;
@@ -61,7 +61,7 @@ class WsClient {
   }
 
   getChannels() {
-    this.ws?.send(JSON.stringify({ type: 'myChannels' }));
+    this.ws?.send(JSON.stringify({ type: 'joinedChannels' }));
     this.ws?.send(JSON.stringify({ type: 'availableChannels' }));
   }
 

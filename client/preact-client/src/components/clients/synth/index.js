@@ -11,7 +11,7 @@ const SynthClient = () => {
   const {
     incomingMessage,
     broadcastMessage,
-    myChannels,
+    joinedChannels,
     sendMessageToTargetClient,
   } = ws;
 
@@ -74,7 +74,7 @@ const SynthClient = () => {
 
       setSequencerIntervalId(
         setInterval(() => {
-          const targetChannel = myChannels.find(
+          const targetChannel = joinedChannels.find(
             (c) => c.channel === channelName
           );
           if (!targetChannel) return;
@@ -112,7 +112,7 @@ const SynthClient = () => {
 
       return () => clearInterval(sequencerIntervalId);
     },
-    [myChannels, sendMessageToTargetClient, sequencerIntervalId, ws.id]
+    [joinedChannels, sendMessageToTargetClient, sequencerIntervalId, ws.id]
   );
 
   return (
@@ -156,7 +156,7 @@ const SynthClient = () => {
           onChange={(e) => handleSequenceChannel(e.target.value)}>
           <>
             <option />
-            {myChannels.map((c) => (
+            {joinedChannels.map((c) => (
               <option key={c.channel}>{c.channel}</option>
             ))}
           </>

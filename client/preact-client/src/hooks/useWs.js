@@ -5,7 +5,7 @@ const useWs = () => {
   const [wsUrl, setWsUrl] = useState('');
   const [history, setHistory] = useState([]);
   const [heartbeat, setHeartbeat] = useState(null);
-  const [myChannels, setMyChannels] = useState([]);
+  const [joinedChannels, setjoinedChannels] = useState([]);
   const [availableChannels, setAvailableChannels] = useState([]);
   const [id, setId] = useState(null);
   const [incomingMessage, setIncomingMessage] = useState('');
@@ -19,8 +19,8 @@ const useWs = () => {
       case 'heartbeat':
         setHeartbeat(data.heartbeat);
         break;
-      case 'myChannels':
-        setMyChannels(data.channels);
+      case 'joinedChannels':
+        setjoinedChannels(data.channels);
         break;
       case 'availableChannels':
         setAvailableChannels(data.channels);
@@ -60,7 +60,7 @@ const useWs = () => {
   }, [onMessage, wsUrl]);
 
   const getChannels = useCallback(() => {
-    ws?.send(JSON.stringify({ type: 'myChannels' }));
+    ws?.send(JSON.stringify({ type: 'joinedChannels' }));
     ws?.send(JSON.stringify({ type: 'availableChannels' }));
   }, [ws]);
 
@@ -151,7 +151,7 @@ const useWs = () => {
     wsUrl,
     setWsUrl,
     history,
-    myChannels,
+    joinedChannels,
     availableChannels,
     id,
     incomingMessage,

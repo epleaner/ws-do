@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 1961.0, 212.0, 1330.0, 847.0 ],
+		"rect" : [ 0.0, 88.0, 1728.0, 1029.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -138,7 +138,6 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 397.5, 659.0, 327.0, 35.0 ],
-					"presentation_linecount" : 3,
 					"text" : ";\rmax launchbrowser https://cnmat.io?channels=max&user=1"
 				}
 
@@ -164,7 +163,6 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 839.0, 616.0, 288.0, 35.0 ],
-					"presentation_linecount" : 3,
 					"text" : ";\rmax launchbrowser https://cnmat.io?channels=david"
 				}
 
@@ -414,13 +412,11 @@
 				"box" : 				{
 					"fontface" : 0,
 					"id" : "obj-17",
-					"linecount" : 6,
 					"maxclass" : "o.display",
 					"numinlets" : 1,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 440.5, 537.5, 386.0, 97.0 ],
-					"text" : "/channels : {\n  /members : [\"a68b6771-2e97-427c-bb99-f709a6dcf4f5\", \"59125290-778e-43eb-83e9-461af437e4c5\"],\n  /channel : \"max\"\n},\n/type : \"availableChannels\""
+					"patching_rect" : [ 440.5, 537.5, 386.0, 33.0 ]
 				}
 
 			}
@@ -428,13 +424,11 @@
 				"box" : 				{
 					"fontface" : 0,
 					"id" : "obj-16",
-					"linecount" : 6,
 					"maxclass" : "o.display",
 					"numinlets" : 1,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 440.5, 237.0, 386.0, 97.0 ],
-					"text" : "/channels : {\n  /members : [\"a68b6771-2e97-427c-bb99-f709a6dcf4f5\", \"59125290-778e-43eb-83e9-461af437e4c5\"],\n  /channel : \"max\"\n},\n/type : \"availableChannels\""
+					"patching_rect" : [ 440.5, 237.0, 386.0, 33.0 ]
 				}
 
 			}
@@ -539,6 +533,8 @@
 					"saved_object_attributes" : 					{
 						"autostart" : 0,
 						"defer" : 0,
+						"node_bin_path" : "",
+						"npm_bin_path" : "",
 						"watch" : 1
 					}
 ,
@@ -627,6 +623,8 @@
 					"saved_object_attributes" : 					{
 						"autostart" : 0,
 						"defer" : 0,
+						"node_bin_path" : "",
+						"npm_bin_path" : "",
 						"watch" : 1
 					}
 ,
@@ -906,7 +904,7 @@
 			}
 , 			{
 				"name" : "max_client.js",
-				"bootpath" : "~/Documents/GitHub/cnmat.io",
+				"bootpath" : "~/workspace/ws-do",
 				"patcherrelativepath" : ".",
 				"type" : "TEXT",
 				"implicit" : 1

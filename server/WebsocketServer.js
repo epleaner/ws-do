@@ -67,6 +67,8 @@ class WebsocketServer {
   }
 
   sendToClient({ message, targetId, sender }) {
+    if (sender.id === targetId) return;
+
     for (const c of this.wss.clients) {
       if (c.id === targetId && c.readyState === WebSocket.OPEN) {
         c.send(
@@ -117,7 +119,7 @@ class WebsocketServer {
     this.logger.log('sending joined channels');
     ws.send(
       JSON.stringify({
-        type: 'myChannels',
+        type: 'joinedChannels',
         channels: Object.keys(this.channels)
           .filter((channel) => this.channels[channel].includes(ws))
           .map((channel) => ({
@@ -194,7 +196,7 @@ class WebsocketServer {
                 this.broadcastMessage({ ...message, sender: client });
                 break;
               }
-              case 'myChannels': {
+              case 'joinedChannels': {
                 this.sendJoinedChannels(client);
                 break;
               }

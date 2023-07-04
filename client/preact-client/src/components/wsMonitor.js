@@ -6,7 +6,7 @@ const WsMonitor = ({ websocket }) => {
     wsUrl,
     setWsUrl,
     history,
-    myChannels,
+    joinedChannels,
     availableChannels,
     id,
     wsState,
@@ -73,7 +73,7 @@ const WsMonitor = ({ websocket }) => {
             </div>
             <ul>
               my channels:
-              {myChannels.map(({ channel, members }) => (
+              {joinedChannels.map(({ channel, members }) => (
                 <li key={channel} className={'ml-2'}>
                   {channel} | {members.length} members: {members.join(', ')}
                 </li>

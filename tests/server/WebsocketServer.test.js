@@ -1,197 +1,491 @@
 const WebSocket = require('ws');
-const WebsocketServer = require('./WebsocketServer.test');
+const WebsocketServer = require('../../server/WebsocketServer');
+
+// Mock dependencies
+jest.mock('ws');
+jest.mock('../../server/Logger', () => {
+  return jest.fn().mockImplementation(() => {
+    return {
+      log: jest.fn(),
+    };
+  });
+});
 
 describe('WebsocketServer', () => {
-  let httpServer;
-  let websocketServer;
+  let server;
+  let mockLogger;
 
   beforeEach(() => {
-    httpServer = {}; // Mock http server
-    websocketServer = new WebsocketServer(httpServer);
+    mockLogger = {
+      log: jest.fn(),
+    };
+    WebSocket.Server.mockClear();
+    server = new WebsocketServer({ logger: mockLogger });
   });
 
-  afterEach(() => {
-    // Clean up channels and clients
-    websocketServer.channels = {};
-    websocketServer.wss.clients.clear();
+  describe('constructor', () => {
+    it('should create a WebSocket.Server instance with correct options', () => {
+      expect(WebSocket.Server).toHaveBeenCalledWith({
+        noServer: true,
+        clientTracking: true,
+      });
+    });
+
+    it('should initialize channels as an empty object', () => {
+      expect(server.channels).toEqual({});
+    });
+
+    it('should create a new Logger instance if logger is not provided', () => {
+      const newServer = new WebsocketServer({});
+      expect(newServer.logger).toBeDefined();
+    });
+
+    it('should assign the provided logger', () => {
+      expect(server.logger).toBe(mockLogger);
+    });
+
+    it('should bind the necessary methods', () => {
+      expect(server.sendChannelMembershipUpdates).toBeDefined();
+      expect(server.addToChannel).toBeDefined();
+      expect(server.removeFromChannel).toBeDefined();
+      expect(server.removeFromChannels).toBeDefined();
+      expect(server.broadcastMessage).toBeDefined();
+      expect(server.sendToClient).toBeDefined();
+      expect(server.sendToChannel).toBeDefined();
+      expect(server.sendToJoinedChannels).toBeDefined();
+      expect(server.sendJoinedChannels).toBeDefined();
+      expect(server.sendAvailableChannels).toBeDefined();
+      expect(server.initializeHandlers).toBeDefined();
+      expect(server.processQueryParams).toBeDefined();
+    });
   });
 
-  it('should add client to channel', () => {
-    const client = { id: 'client1' };
-    const channel = 'channel1';
+  describe('sendChannelMembershipUpdates', () => {
+    it('should send joined channels to the specified client', () => {
+      const client = { id: '123' };
+      server.channels = {
+        channel1: [client],
+        channel2: [client],
+      };
+      server.sendJoinedChannels = jest.fn();
 
-    websocketServer.addToChannel(channel, client);
+      server.sendChannelMembershipUpdates(client);
 
-    expect(websocketServer.channels[channel]).toEqual([client]);
+      expect(server.sendJoinedChannels).toHaveBeenCalledWith(client);
+    });
   });
 
-  it('should add client to existing channel', () => {
-    const client1 = { id: 'client1' };
-    const client2 = { id: 'client2' };
-    const channel = 'channel1';
+  describe('addToChannel', () => {
+    it('should add a client to the specified channel', () => {
+      const client = { id: '123' };
 
-    websocketServer.addToChannel(channel, client1);
-    websocketServer.addToChannel(channel, client2);
+      server.addToChannel('channel1', client);
 
-    expect(websocketServer.channels[channel]).toEqual([client1, client2]);
+      expect(server.channels.channel1).toEqual([client]);
+    });
+
+    it('should create a new channel if it does not exist', () => {
+      const client = { id: '123' };
+
+      server.addToChannel('channel1', client);
+
+      expect(server.channels.channel1).toBeDefined();
+    });
+
+    it('should append a client to an existing channel', () => {
+      const client1 = { id: '123' };
+      const client2 = { id: '456' };
+      server.channels.channel1 = [client1];
+
+      server.addToChannel('channel1', client2);
+
+      expect(server.channels.channel1).toEqual([client1, client2]);
+    });
   });
 
-  it('should remove client from channel', () => {
-    const client = { id: 'client1' };
-    const channel = 'channel1';
+  describe('removeFromChannel', () => {
+    it('should remove a client from the specified channel', () => {
+      const client = { id: '123' };
+      const client2 = { id: '124' };
+      server.channels.channel1 = [client, client2];
 
-    websocketServer.channels[channel] = [client];
+      server.removeFromChannel('channel1', client);
 
-    websocketServer.removeFromChannel(channel, client);
+      expect(server.channels.channel1).toEqual([client2]);
+    });
 
-    expect(websocketServer.channels[channel]).toBeUndefined();
+    it('should delete the channel if it becomes empty', () => {
+      const client = { id: '123' };
+      server.channels.channel1 = [client];
+
+      server.removeFromChannel('channel1', client);
+
+      expect(server.channels.channel1).toBeUndefined();
+    });
   });
 
-  it('should remove client from multiple channels', () => {
-    const client = { id: 'client1' };
-    const channel1 = 'channel1';
-    const channel2 = 'channel2';
+  describe('removeFromChannels', () => {
+    it('should remove a client from all channels', () => {
+      const client = { id: '123' };
+      server.channels = {
+        channel1: [client],
+        channel2: [client],
+      };
 
-    websocketServer.channels[channel1] = [client];
-    websocketServer.channels[channel2] = [client];
+      server.removeFromChannels(client);
 
-    websocketServer.removeFromChannels(client);
-
-    expect(websocketServer.channels[channel1]).toBeUndefined();
-    expect(websocketServer.channels[channel2]).toBeUndefined();
+      expect(server.channels).toEqual({});
+    });
   });
 
-  it('should broadcast message to all clients except sender', () => {
-    const sender = { id: 'sender' };
-    const client1 = {
-      id: 'client1',
-      readyState: WebSocket.OPEN,
-      send: jest.fn(),
-    };
-    const client2 = {
-      id: 'client2',
-      readyState: WebSocket.OPEN,
-      send: jest.fn(),
-    };
-    const client3 = {
-      id: 'client3',
-      readyState: WebSocket.CLOSED,
-      send: jest.fn(),
-    };
+  describe('broadcastMessage', () => {
+    it('should broadcast a message to all connected clients except the sender', () => {
+      const sender = { id: '123', readyState: WebSocket.OPEN };
+      const client1 = {
+        id: '456',
+        readyState: WebSocket.OPEN,
+        send: jest.fn(),
+      };
+      const client2 = {
+        id: '789',
+        readyState: WebSocket.OPEN,
+        send: jest.fn(),
+      };
+      server.wss.clients = new Set([sender, client1, client2]);
 
-    websocketServer.wss.clients = new Set([client1, client2, client3]);
+      const message = { type: 'message' };
+      server.broadcastMessage({ message, sender });
 
-    const message = { type: 'broadcast', content: 'Hello' };
+      expect(client1.send).toHaveBeenCalledWith(
+        JSON.stringify({ ...message, from: sender.id })
+      );
+      expect(client2.send).toHaveBeenCalledWith(
+        JSON.stringify({ ...message, from: sender.id })
+      );
+    });
 
-    websocketServer.broadcastMessage({ message, sender });
+    it('should not send a message to the sender', () => {
+      const sender = { id: '123', readyState: WebSocket.OPEN, send: jest.fn() };
+      server.wss.clients = new Set([sender]);
 
-    expect(client1.send).toHaveBeenCalledWith(
-      JSON.stringify({ ...message, from: sender.id })
-    );
-    expect(client2.send).toHaveBeenCalledWith(
-      JSON.stringify({ ...message, from: sender.id })
-    );
-    expect(client3.send).not.toHaveBeenCalled();
+      const message = { type: 'message' };
+      server.broadcastMessage({ message, sender });
+
+      expect(sender.send).not.toHaveBeenCalled();
+    });
+
+    it('should not send a message to clients with readyState different from WebSocket.OPEN', () => {
+      const sender = { id: '123', readyState: WebSocket.OPEN };
+      const client1 = {
+        id: '456',
+        readyState: WebSocket.CLOSED,
+        send: jest.fn(),
+      };
+      const client2 = {
+        id: '789',
+        readyState: WebSocket.CONNECTING,
+        send: jest.fn(),
+      };
+      server.wss.clients = new Set([sender, client1, client2]);
+
+      const message = { type: 'message' };
+      server.broadcastMessage({ message, sender });
+
+      expect(client1.send).not.toHaveBeenCalled();
+      expect(client2.send).not.toHaveBeenCalled();
+    });
   });
 
-  it('should send message to specific client', () => {
-    const sender = { id: 'sender' };
-    const targetId = 'client1';
-    const client1 = {
-      id: 'client1',
-      readyState: WebSocket.OPEN,
-      send: jest.fn(),
-    };
-    const client2 = {
-      id: 'client2',
-      readyState: WebSocket.CLOSED,
-      send: jest.fn(),
-    };
+  describe('sendToClient', () => {
+    it('should send a message to the specified client', () => {
+      const sender = { id: '123' };
+      const targetId = '456';
+      const client = {
+        id: targetId,
+        readyState: WebSocket.OPEN,
+        send: jest.fn(),
+      };
+      server.wss.clients = new Set([sender, client]);
 
-    websocketServer.wss.clients = new Set([client1, client2]);
+      const message = { type: 'message' };
+      server.sendToClient({ message, targetId, sender });
 
-    const message = { type: 'directMessage', content: 'Hi' };
+      expect(client.send).toHaveBeenCalledWith(
+        JSON.stringify({ ...message, from: sender.id, directMessage: true })
+      );
+    });
 
-    websocketServer.sendToClient({ message, targetId, sender });
+    it('should not send a message to the target client if it is not found', () => {
+      const sender = { id: '123' };
+      const targetId = '456';
+      server.wss.clients = new Set([sender]);
 
-    expect(client1.send).toHaveBeenCalledWith(
-      JSON.stringify({ ...message, from: sender.id, directMessage: true })
-    );
-    expect(client2.send).not.toHaveBeenCalled();
+      const message = { type: 'message' };
+      server.sendToClient({ message, targetId, sender });
+
+      // No error should be thrown
+    });
+
+    it('should not send a message to the sender', () => {
+      const sender = { id: '123', readyState: WebSocket.OPEN, send: jest.fn() };
+      server.wss.clients = new Set([sender]);
+
+      const message = { type: 'message' };
+      server.sendToClient({ message, targetId: '123', sender });
+
+      expect(sender.send).not.toHaveBeenCalled();
+    });
+
+    it('should not send a message if the target client has readyState different from WebSocket.OPEN', () => {
+      const sender = { id: '123' };
+      const targetId = '456';
+      const client = {
+        id: targetId,
+        readyState: WebSocket.CLOSED,
+        send: jest.fn(),
+      };
+      server.wss.clients = new Set([sender, client]);
+
+      const message = { type: 'message' };
+      server.sendToClient({ message, targetId, sender });
+
+      expect(client.send).not.toHaveBeenCalled();
+    });
   });
 
-  it('should send message to clients in a channel', () => {
-    const sender = { id: 'sender' };
-    const client1 = {
-      id: 'client1',
-      readyState: WebSocket.OPEN,
-      send: jest.fn(),
-    };
-    const client2 = {
-      id: 'client2',
-      readyState: WebSocket.OPEN,
-      send: jest.fn(),
-    };
-    const client3 = {
-      id: 'client3',
-      readyState: WebSocket.CLOSED,
-      send: jest.fn(),
-    };
+  describe('sendToClientOnChannel', () => {
+    it('should send a message to the specified client on the specified channel', () => {
+      const sender = { id: '123' };
+      const targetId = '456';
+      const channel = 'channel1';
+      const client = {
+        id: targetId,
+        readyState: WebSocket.OPEN,
+        send: jest.fn(),
+      };
+      server.channels[channel] = [sender, client];
+      server.wss.clients = new Set([sender, client]);
 
-    const channel = 'channel1';
+      const message = { type: 'message' };
+      server.sendToClientOnChannel({ message, targetId, channel, sender });
 
-    websocketServer.channels[channel] = [client1, client2, client3];
-    websocketServer.wss.clients = new Set([client1, client2, client3]);
+      expect(client.send).toHaveBeenCalledWith(
+        JSON.stringify({ ...message, channel, targetId, from: sender.id })
+      );
+    });
 
-    const message = { type: 'channelMessage', content: 'Hello' };
+    it('should not send a message if the sender is not a member of the specified channel', () => {
+      const sender = { id: '123' };
+      const targetId = '456';
+      const channel = 'channel1';
+      const client = {
+        id: targetId,
+        readyState: WebSocket.OPEN,
+        send: jest.fn(),
+      };
+      server.channels[channel] = [client];
 
-    websocketServer.sendToChannel({ message, channel, sender });
+      const message = { type: 'message' };
+      server.sendToClientOnChannel({ message, targetId, channel, sender });
 
-    expect(client1.send).toHaveBeenCalledWith(
-      JSON.stringify({ ...message, channel, from: sender.id })
-    );
-    expect(client2.send).toHaveBeenCalledWith(
-      JSON.stringify({ ...message, channel, from: sender.id })
-    );
-    expect(client3.send).not.toHaveBeenCalled();
+      expect(client.send).not.toHaveBeenCalled();
+    });
+
+    it('should not send a message if the target client is not found on the specified channel', () => {
+      const sender = { id: '123' };
+      const targetId = '456';
+      const channel = 'channel1';
+      server.channels[channel] = [sender];
+
+      const message = { type: 'message' };
+      server.sendToClientOnChannel({ message, targetId, channel, sender });
+
+      // No error should be thrown
+    });
+
+    it('should not send a message if the target client has readyState different from WebSocket.OPEN', () => {
+      const sender = { id: '123' };
+      const targetId = '456';
+      const channel = 'channel1';
+      const client = {
+        id: targetId,
+        readyState: WebSocket.CLOSED,
+        send: jest.fn(),
+      };
+      server.channels[channel] = [sender, client];
+      server.wss.clients = new Set([sender, client]);
+
+      const message = { type: 'message' };
+      server.sendToClientOnChannel({ message, targetId, channel, sender });
+
+      expect(client.send).not.toHaveBeenCalled();
+    });
   });
 
-  it('should send message to clients in joined channels', () => {
-    const sender = { id: 'sender' };
-    const client1 = {
-      id: 'client1',
-      readyState: WebSocket.OPEN,
-      send: jest.fn(),
-    };
-    const client2 = {
-      id: 'client2',
-      readyState: WebSocket.OPEN,
-      send: jest.fn(),
-    };
-    const client3 = {
-      id: 'client3',
-      readyState: WebSocket.CLOSED,
-      send: jest.fn(),
-    };
+  describe('sendToChannel', () => {
+    it('should send a message to all clients in the specified channel except the sender', () => {
+      const sender = { id: '123' };
+      const client1 = {
+        id: '456',
+        readyState: WebSocket.OPEN,
+        send: jest.fn(),
+      };
+      const client2 = {
+        id: '789',
+        readyState: WebSocket.OPEN,
+        send: jest.fn(),
+      };
+      server.channels.channel1 = [sender, client1, client2];
+      server.wss.clients = new Set([sender, client1, client2]);
 
-    const channel1 = 'channel1';
-    const channel2 = 'channel2';
+      const message = { type: 'message' };
+      server.sendToChannel({ message, channel: 'channel1', sender });
 
-    websocketServer.channels[channel1] = [client1, client3];
-    websocketServer.channels[channel2] = [client2, client3];
+      expect(client1.send).toHaveBeenCalledWith(
+        JSON.stringify({ ...message, channel: 'channel1', from: sender.id })
+      );
+      expect(client2.send).toHaveBeenCalledWith(
+        JSON.stringify({ ...message, channel: 'channel1', from: sender.id })
+      );
+    });
 
-    websocketServer.wss.clients = new Set([client1, client2, client3]);
+    it('should not send a message to clients who are not members of the specified channel', () => {
+      const sender = { id: '123' };
+      const client = { id: '456', readyState: WebSocket.OPEN, send: jest.fn() };
+      server.channels.channel1 = [client];
 
-    const message = { type: 'channelMessage', content: 'Hello' };
+      const message = { type: 'message' };
+      server.sendToChannel({ message, channel: 'channel1', sender });
 
-    websocketServer.sendToJoinedChannels({ message, sender });
+      expect(client.send).not.toHaveBeenCalled();
+    });
 
-    expect(client1.send).toHaveBeenCalledWith(
-      JSON.stringify({ ...message, channel: channel1, from: sender.id })
-    );
-    expect(client2.send).toHaveBeenCalledWith(
-      JSON.stringify({ ...message, channel: channel2, from: sender.id })
-    );
-    expect(client3.send).not.toHaveBeenCalled();
+    it('should not send a message to clients with readyState different from WebSocket.OPEN', () => {
+      const sender = { id: '123' };
+      const client1 = {
+        id: '456',
+        readyState: WebSocket.CLOSED,
+        send: jest.fn(),
+      };
+      const client2 = {
+        id: '789',
+        readyState: WebSocket.CONNECTING,
+        send: jest.fn(),
+      };
+      server.channels.channel1 = [sender, client1, client2];
+      server.wss.clients = new Set([sender, client1, client2]);
+
+      const message = { type: 'message' };
+      server.sendToChannel({ message, channel: 'channel1', sender });
+
+      expect(client1.send).not.toHaveBeenCalled();
+      expect(client2.send).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('sendToJoinedChannels', () => {
+    it('should send a message to all clients in the joined channels except the sender', () => {
+      const sender = { id: '123' };
+      const client1 = {
+        id: '456',
+        readyState: WebSocket.OPEN,
+        send: jest.fn(),
+      };
+      const client2 = {
+        id: '789',
+        readyState: WebSocket.OPEN,
+        send: jest.fn(),
+      };
+      server.channels = {
+        channel1: [sender, client1],
+        channel2: [sender, client2],
+      };
+      server.wss.clients = new Set([sender, client1, client2]);
+
+      const message = { type: 'message' };
+      server.sendToJoinedChannels({ message, sender });
+
+      expect(client1.send).toHaveBeenCalledWith(
+        JSON.stringify({ ...message, channel: 'channel1', from: sender.id })
+      );
+      expect(client2.send).toHaveBeenCalledWith(
+        JSON.stringify({ ...message, channel: 'channel2', from: sender.id })
+      );
+    });
+
+    it('should not send a message to clients who are not members of any channel', () => {
+      const sender = { id: '123' };
+      const client = { id: '456', readyState: WebSocket.OPEN, send: jest.fn() };
+      server.channels = {
+        channel1: [client],
+      };
+
+      const message = { type: 'message' };
+      server.sendToJoinedChannels({ message, sender });
+
+      expect(client.send).not.toHaveBeenCalled();
+    });
+
+    it('should not send a message to clients with readyState different from WebSocket.OPEN', () => {
+      const sender = { id: '123' };
+      const client1 = {
+        id: '456',
+        readyState: WebSocket.CLOSED,
+        send: jest.fn(),
+      };
+      const client2 = {
+        id: '789',
+        readyState: WebSocket.CONNECTING,
+        send: jest.fn(),
+      };
+      server.channels = {
+        channel1: [sender, client1],
+        channel2: [sender, client2],
+      };
+
+      server.wss.clients = new Set([sender, client1, client2]);
+
+      const message = { type: 'message' };
+      server.sendToJoinedChannels({ message, sender });
+
+      expect(client1.send).not.toHaveBeenCalled();
+      expect(client2.send).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('sendJoinedChannels', () => {
+    it('should send the joined channels to the specified client', () => {
+      const client = { id: '123', readyState: WebSocket.OPEN, send: jest.fn() };
+      server.channels = {
+        channel1: [client],
+        channel2: [client],
+      };
+
+      server.sendJoinedChannels(client);
+
+      expect(client.send).toHaveBeenCalledWith(
+        JSON.stringify({
+          type: 'joinedChannels',
+          channels: [
+            { channel: 'channel1', members: ['123'] },
+            { channel: 'channel2', members: ['123'] },
+          ],
+        })
+      );
+    });
+
+    it('should not send any channels if the client is not a member of any channel', () => {
+      const client = { id: '123', readyState: WebSocket.OPEN, send: jest.fn() };
+      server.channels = {};
+
+      server.sendJoinedChannels(client);
+
+      expect(client.send).toHaveBeenCalledWith(
+        JSON.stringify({
+          type: 'joinedChannels',
+          channels: [],
+        })
+      );
+    });
   });
 });
