@@ -1,22 +1,20 @@
-# client
+# server
 
 ## CLI Commands
 
 ```bash
 # install dependencies
-npm install
-
-# serve with hot reload at localhost:8080
-npm run dev
+yarn
 
 # build for production with minification
-npm run build
+yarn build
 
-# test the production build locally
-npm run serve
+# start the production build locally
+yarn start
 
-# run tests with jest and enzyme
-npm run test
+# code linting
+yarn lint
+
+# run tests with jest
+yarn test
 ```
-
-For detailed explanation on how things work, checkout the [CLI Readme](https://github.com/developit/preact-cli/blob/master/README.md).

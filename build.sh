@@ -9,5 +9,4 @@ mkdir build/
 
 cp -a client/static/* build/;
 
-mkdir build/preact
-cp -a client/preact-client/build/* build/preact/;
+cp -a client/preact-client/build/* build/;
