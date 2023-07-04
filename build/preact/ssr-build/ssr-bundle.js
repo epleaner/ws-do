@@ -2332,7 +2332,7 @@ var WsMonitor = function WsMonitor(_ref) {
     wsUrl = websocket.wsUrl,
     setWsUrl = websocket.setWsUrl,
     history = websocket.history,
-    myChannels = websocket.myChannels,
+    joinedChannels = websocket.joinedChannels,
     availableChannels = websocket.availableChannels,
     id = websocket.id,
     wsState = websocket.wsState,
@@ -2391,7 +2391,7 @@ var WsMonitor = function WsMonitor(_ref) {
   }), h("button", {
     type: "submit",
     className: "ml-2"
-  }, "join channel"))), h("ul", null, "my channels:", myChannels.map(function (_ref2) {
+  }, "join channel"))), h("ul", null, "my channels:", joinedChannels.map(function (_ref2) {
     var channel = _ref2.channel,
       members = _ref2.members;
     return h("li", {
@@ -2551,8 +2551,8 @@ var useWs = function useWs() {
     setHeartbeat = _useState8[1];
   var _useState9 = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_0__[/* useState */ "k"])([]),
     _useState10 = _slicedToArray(_useState9, 2),
-    myChannels = _useState10[0],
-    setMyChannels = _useState10[1];
+    joinedChannels = _useState10[0],
+    setjoinedChannels = _useState10[1];
   var _useState11 = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_0__[/* useState */ "k"])([]),
     _useState12 = _slicedToArray(_useState11, 2),
     availableChannels = _useState12[0],
@@ -2575,8 +2575,8 @@ var useWs = function useWs() {
         case 'heartbeat':
           setHeartbeat(data.heartbeat);
           break;
-        case 'myChannels':
-          setMyChannels(data.channels);
+        case 'joinedChannels':
+          setjoinedChannels(data.channels);
           break;
         case 'availableChannels':
           setAvailableChannels(data.channels);
@@ -2597,7 +2597,9 @@ var useWs = function useWs() {
     if (!window) return;
     var protocol = window.location.protocol.includes('https') ? 'wss' : 'ws';
     var port = window.location.protocol.includes('https') ? '' : ':3000';
-    var url = "".concat(protocol, "://").concat(location.hostname).concat(port, "?channels=welcome");
+    var queryParams = new URLSearchParams(window.location.search).toString();
+    var url = "".concat(protocol, "://").concat(location.hostname).concat(port);
+    url = [url, queryParams].join('?');
     setWsUrl(url);
   }, []);
   Object(preact_hooks__WEBPACK_IMPORTED_MODULE_0__[/* useEffect */ "d"])(function () {
@@ -2613,7 +2615,7 @@ var useWs = function useWs() {
   }, [onMessage, wsUrl]);
   var getChannels = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_0__[/* useCallback */ "a"])(function () {
     ws === null || ws === void 0 ? void 0 : ws.send(JSON.stringify({
-      type: 'myChannels'
+      type: 'joinedChannels'
     }));
     ws === null || ws === void 0 ? void 0 : ws.send(JSON.stringify({
       type: 'availableChannels'
@@ -2675,7 +2677,7 @@ var useWs = function useWs() {
     wsUrl: wsUrl,
     setWsUrl: setWsUrl,
     history: history,
-    myChannels: myChannels,
+    joinedChannels: joinedChannels,
     availableChannels: availableChannels,
     id: id,
     incomingMessage: incomingMessage,
@@ -4209,7 +4211,7 @@ var SynthClient = function SynthClient() {
   var ws = Object(_hooks_useWs__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"])();
   var incomingMessage = ws.incomingMessage,
     broadcastMessage = ws.broadcastMessage,
-    myChannels = ws.myChannels,
+    joinedChannels = ws.joinedChannels,
     sendMessageToTargetClient = ws.sendMessageToTargetClient;
   var _useState = Object(preact_hooks__WEBPACK_IMPORTED_MODULE_0__[/* useState */ "k"])(null),
     _useState2 = _slicedToArray(_useState, 2),
@@ -4268,7 +4270,7 @@ var SynthClient = function SynthClient() {
     console.log('setting new interval id');
     var sequenceTarget;
     setSequencerIntervalId(setInterval(function () {
-      var targetChannel = myChannels.find(function (c) {
+      var targetChannel = joinedChannels.find(function (c) {
         return c.channel === channelName;
       });
       if (!targetChannel) return;
@@ -4297,7 +4299,7 @@ var SynthClient = function SynthClient() {
     return function () {
       return clearInterval(sequencerIntervalId);
     };
-  }, [myChannels, sendMessageToTargetClient, sequencerIntervalId, ws.id]);
+  }, [joinedChannels, sendMessageToTargetClient, sequencerIntervalId, ws.id]);
   return h("div", null, h(_wsMonitor__WEBPACK_IMPORTED_MODULE_4__[/* default */ "a"], {
     websocket: ws
   }), h("div", {
@@ -4341,7 +4343,7 @@ var SynthClient = function SynthClient() {
     onChange: function onChange(e) {
       return handleSequenceChannel(e.target.value);
     }
-  }, h(Fragment, null, h("option", null), myChannels.map(function (c) {
+  }, h(Fragment, null, h("option", null), joinedChannels.map(function (c) {
     return h("option", {
       key: c.channel
     }, c.channel);
