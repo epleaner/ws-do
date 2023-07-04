@@ -174,64 +174,68 @@ class WebsocketServer {
       }
 
       client.on('message', (data, binary) => {
-        const message = binary ? data : JSON.parse(data);
+        try {
+          const message = binary ? data : JSON.parse(data);
 
-        console.log('received message', message);
+          console.log('received message', message);
 
-        if (!binary) {
-          switch (message.type) {
-            case 'joinChannel': {
-              this.addToChannel(message.channel, client);
-              this.wss.clients.forEach(this.sendChannelMembershipUpdates);
-              break;
-            }
-            case 'leaveChannel': {
-              this.removeFromChannel(message.channel, client);
-              this.wss.clients.forEach(this.sendChannelMembershipUpdates);
-              break;
-            }
-            case 'broadcast': {
-              this.broadcastMessage({ ...message, sender: client });
-              break;
-            }
+          if (!binary) {
+            switch (message.type) {
+              case 'joinChannel': {
+                this.addToChannel(message.channel, client);
+                this.wss.clients.forEach(this.sendChannelMembershipUpdates);
+                break;
+              }
+              case 'leaveChannel': {
+                this.removeFromChannel(message.channel, client);
+                this.wss.clients.forEach(this.sendChannelMembershipUpdates);
+                break;
+              }
+              case 'broadcast': {
+                this.broadcastMessage({ ...message, sender: client });
+                break;
+              }
 
-            case 'myChannels': {
-              this.sendJoinedChannels(client);
-              this.sendAvailableChannels(client);
-              break;
-            }
-            case 'availableChannels': {
-              this.sendAvailableChannels(client);
-              break;
-            }
-            default:
-              if (message.targetId) {
-                if (message.channel) {
-                  this.sendToClientOnChannel({
+              case 'myChannels': {
+                this.sendJoinedChannels(client);
+                this.sendAvailableChannels(client);
+                break;
+              }
+              case 'availableChannels': {
+                this.sendAvailableChannels(client);
+                break;
+              }
+              default:
+                if (message.targetId) {
+                  if (message.channel) {
+                    this.sendToClientOnChannel({
+                      message,
+                      targetId: message.targetId,
+                      channel: message.channel,
+                      sender: client,
+                    });
+                  } else
+                    this.sendToClient({
+                      message,
+                      targetId: message.targetId,
+                      sender: client,
+                    });
+                  break;
+                } else if (message.channel) {
+                  this.sendToChannel({
                     message,
-                    targetId: message.targetId,
                     channel: message.channel,
                     sender: client,
                   });
-                } else
-                  this.sendToClient({
-                    message,
-                    targetId: message.targetId,
-                    sender: client,
-                  });
-                break;
-              } else if (message.channel) {
-                this.sendToChannel({
-                  message,
-                  channel: message.channel,
-                  sender: client,
-                });
-                break;
-              } else {
-                this.sendToJoinedChannels({ message, sender: client });
-                break;
-              }
+                  break;
+                } else {
+                  this.sendToJoinedChannels({ message, sender: client });
+                  break;
+                }
+            }
           }
+        } catch (e) {
+          console.log('error parsing message', e);
         }
       });
 
