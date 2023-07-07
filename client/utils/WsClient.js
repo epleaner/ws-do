@@ -1,5 +1,6 @@
-class WsClient {
-  constructor({ handleMessage }) {
+export default class WsClient {
+  constructor({ handleMessage } = {}) {
+    this.foo = 'bar';
     this.ws = null;
     this.wsUrl = '';
     this.history = [];
@@ -8,7 +9,7 @@ class WsClient {
     this.availableChannels = [];
     this.id = null;
     this.incomingMessage = '';
-    this.handleMessage = handleMessage;
+    this.handleMessage = handleMessage || (() => {});
 
     this.connect = this.connect.bind(this);
     this.initialize = this.initialize.bind(this);
