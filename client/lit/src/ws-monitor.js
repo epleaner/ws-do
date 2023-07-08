@@ -75,6 +75,24 @@ class WsMonitor extends LitElement {
     this._visible = true;
   }
 
+  connectedCallback() {
+    super.connectedCallback();
+    document.body.addEventListener('keydown', this.handleKeyPress.bind(this));
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    document.body.removeEventListener(
+      'keydown',
+      this.handleKeyPress.bind(this)
+    );
+  }
+
+  handleKeyPress(event) {
+    // Handle the keypress event here
+    if (event.key === '=') this._viewToggleHandler();
+  }
+
   _viewToggleHandler() {
     this._visible = !this._visible;
   }
