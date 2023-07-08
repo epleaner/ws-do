@@ -9,14 +9,14 @@ class WsComponent extends LitElement {
 
   static get properties() {
     return {
-      ws: {type: Object, reflect: true},
+      wsClient: {type: Object, reflect: true},
     };
   }
 
   render() {
-    if (!this.ws) return html`<p>loading...</p>`;
+    if (!this.wsClient) return html`<p>loading...</p>`;
 
-    return html`<p>${this.ws.wsUrl}</p>`;
+    return html`<p>${this.wsClient.wsUrl}</p>`;
   }
 }
 
