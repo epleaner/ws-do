@@ -130,7 +130,7 @@ class WsMonitor extends LitElement {
         </form>
         <div class="channels">
           <ul>
-            my channels:
+            joined channels:
             ${joinedChannels.map(
               ({channel, members}) => html`
                 <li class="ml-2">
