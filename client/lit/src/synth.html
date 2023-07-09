@@ -13,10 +13,23 @@
   </head>
 
   <body>
-    <ws-monitor></ws-monitor>
-
+    <div id="ws-monitor-container"></div>
     <script type="module">
       import WsClient from '../../utils/WsClient.js';
+      import {observable, decorate} from 'mobx';
+      import {render, html} from 'lit';
+
+      decorate(WsClient, {
+        ws: observable,
+        wsUrl: observable,
+        history: observable,
+        heartbeat: observable,
+        joinedChannels: observable,
+        availableChannels: observable,
+        id: observable,
+        incomingMessage: observable,
+        handleMessage: observable,
+      });
 
       window.wsClient = new WsClient({
         handleMessage: (data) => {
@@ -28,7 +41,11 @@
         },
       });
 
-      document.querySelector('ws-monitor').wsClient = window.wsClient;
+      const template = html`<ws-monitor
+        .wsClient=${window.wsClient}
+      ></ws-monitor>`;
+
+      render(template, document.getElementById('ws-monitor-container'));
     </script>
 
     <div id="canvas"></div>

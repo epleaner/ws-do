@@ -32,7 +32,9 @@
   "author": "Google LLC",
   "license": "BSD-3-Clause",
   "dependencies": {
+    "@adobe/lit-mobx": "^2.2.0",
     "lit": "^2.2.4",
+    "mobx": "^5.15.4",
     "three": "^0.154.0"
   },
   "devDependencies": {

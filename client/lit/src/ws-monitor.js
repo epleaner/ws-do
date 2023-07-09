@@ -1,6 +1,7 @@
-import {html, css, LitElement} from 'lit';
+import {html, css} from 'lit';
+import {MobxLitElement} from '@adobe/lit-mobx';
 
-class WsMonitor extends LitElement {
+class WsMonitor extends MobxLitElement {
   static styles = css`
     .container {
       font-size: 10px;
@@ -8,7 +9,6 @@ class WsMonitor extends LitElement {
       position: fixed;
       color: black;
     }
-
     button {
       font-size: 10px;
       background-color: rgba(255, 192, 203, 0.5);
@@ -28,13 +28,13 @@ class WsMonitor extends LitElement {
       background-color: rgba(255, 192, 203, 0.5);
       padding: 10px;
       border-radius: 4px;
-      margin-top: 5px;
     }
     input {
       background-color: transparent;
       border: 0px;
       border-bottom: 1px solid black;
       color: black;
+      font-size: 10px;
     }
 
     input:focus {
@@ -61,8 +61,14 @@ class WsMonitor extends LitElement {
 
   static get properties() {
     return {
-      wsClient: {type: Object, reflect: true},
-      _visible: {type: Boolean, reflect: true},
+      wsClient: {
+        type: Object,
+        reflect: true,
+      },
+      _visible: {
+        type: Boolean,
+        reflect: true,
+      },
     };
   }
 
@@ -73,6 +79,7 @@ class WsMonitor extends LitElement {
     this.targetId = '';
     this.messageIsValidJSON = false;
     this._visible = true;
+    this.wsClient = null;
   }
 
   connectedCallback() {
@@ -89,8 +96,7 @@ class WsMonitor extends LitElement {
   }
 
   handleKeyPress(event) {
-    // Handle the keypress event here
-    if (event.key === '=') this._viewToggleHandler();
+    if (event.shiftKey && event.code === 'Space') this._viewToggleHandler();
   }
 
   _viewToggleHandler() {
@@ -187,18 +193,9 @@ class WsMonitor extends LitElement {
       </div>
     `;
 
-    const toggleButton = html`<div class="view-toggle">
-      <button @click=${this._viewToggleHandler}>
-        ${this._visible ? '-' : '+'}
-      </button>
-    </div>`;
-
     return html`
       <div class="container">
-        <div>
-          ${toggleButton}
-          <div>${this._visible ? body : ''}</div>
-        </div>
+        <div>${this._visible ? body : ''}</div>
       </div>
     `;
   }
