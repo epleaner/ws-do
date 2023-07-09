@@ -1,6 +1,5 @@
 export default class WsClient {
   constructor({ handleMessage } = {}) {
-    this.foo = 'bar';
     this.ws = null;
     this.wsUrl = '';
     this.history = [];
