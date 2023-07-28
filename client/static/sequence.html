@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sequencer</title>
+  <style>
+    .note-container {
+      display: grid;
+      grid-template-columns: repeat(8, 20px);
+      grid-gap: 2px;
+      margin-bottom: 10px;
+    }
+
+    .note {
+      width: 20px;
+      height: 20px;
+      background-color: lightgray;
+    }
+
+    .active-note {
+      background-color: orange;
+    }
+
+    .selected-note {
+      background-color: limegreen;
+    }
+  </style>
+</head>
+<body>
+  <div id="sequencer">
+    <h2>Sequencer</h2>
+    <div class="note-container" id="noteContainer"></div>
+    <button id="stepButton">Step</button>
+  </div>
+
+  <div id="controls">
+    <h2>Controls</h2>
+    <div>
+      Oscillator Frequency:
+      <input type="number" id="oscillatorFreqInput" value="81" min="1" max="1000">
+      Hz
+    </div>
+    <div>
+      Filter Frequency:
+      <input type="number" id="filterFreqInput" value="82" min="20" max="2000">
+      Hz
+    </div>
+    <div>
+      Oscillator Timeout:
+      <input type="number" id="oscillatorTimeoutInput" value="45" min="1" max="1000">
+      ms
+    </div>
+    <div>
+      Gain:
+      <input type="range" id="gainInput" value="0.5" min="0" max="1" step="0.01">
+    </div>
+  </div>
+
+  <script>
+
+const wsantiph = 'wss://cnmat.io?channels=metrognome';
+  const ws = new WebSocket(wsantiph);
+  ws.onopen = () => {
+      console.log('Websocket established');
+  }
+  ws.onmessage = e => {
+      const data = JSON.parse(e.data);
+
+      // Check if the message contains a numeric value (in this case, '1')
+      if (typeof data.value === 'number' && data.value === 1) {
+        // Update the sequencer step and play the bass synth
+        playFatBass();
+        console.log('bang');
+      }
+
+      // Check if the message contains a tempo value
+      if (typeof data.tempo === 'number') {
+        handleIncomingTempo(data.tempo);
+      }
+    };
+    // Create Audio Context
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    let currentStep = 0;
+    let gainValue = 0.5;
+
+    // Create an array to store the note sequence
+    const noteSequence = new Array(64).fill(false);
+
+    // Function to create and play the bass synth
+    function playFatBass() {
+      currentStep = (currentStep + 1) % noteSequence.length;
+      updateNoteHighlight(currentStep);
+
+      if (noteSequence[currentStep]) {
+        // Create Oscillator
+        const oscillator = audioContext.createOscillator();
+        oscillator.type = 'triangle'; // Using a triangle waveform for a closer TR-808 sound
+        oscillator.frequency.value = parseFloat(document.getElementById('oscillatorFreqInput').value);
+        // Adjust the frequency to your desired pitch
+
+        // Apply Filter
+        const filter = audioContext.createBiquadFilter();
+        filter.type = 'lowpass'; // Use a lowpass filter for the characteristic sound
+        filter.frequency.value = parseFloat(document.getElementById('filterFreqInput').value);
+        // Adjust the cutoff frequency to your liking
+
+        // Apply Envelope to Filter
+        const envelope = audioContext.createGain();
+        envelope.gain.setValueAtTime(0.0, audioContext.currentTime);
+        envelope.gain.linearRampToValueAtTime(gainValue, audioContext.currentTime + 0.01);
+        envelope.gain.linearRampToValueAtTime(0.0, audioContext.currentTime + 0.5);
+
+        // Connect Oscillator to Filter
+        oscillator.connect(filter);
+
+        // Connect Filter to Envelope
+        filter.connect(envelope);
+
+        // Connect Envelope to Audio Output
+        envelope.connect(audioContext.destination);
+
+        // Start the Oscillator
+        oscillator.start();
+
+        // Stop the Oscillator after the envelope has finished
+        setTimeout(() => {
+          oscillator.stop();
+        }, parseInt(document.getElementById('oscillatorTimeoutInput').value));
+      }
+    }
+
+    // Function to toggle a note on/off
+    function toggleNote(step) {
+      noteSequence[step] = !noteSequence[step];
+      const noteElement = document.getElementById(`note-${step}`);
+      noteElement.classList.toggle('selected-note', noteSequence[step]);
+    }
+
+    // Function to update note highlight
+    function updateNoteHighlight(step) {
+      const noteElements = document.getElementsByClassName('note');
+      for (let i = 0; i < noteElements.length; i++) {
+        noteElements[i].classList.remove('active-note');
+        noteElements[i].classList.remove('selected-note');
+        if (i === step) {
+          noteElements[i].classList.add('active-note');
+        }
+        if (noteSequence[i]) {
+          noteElements[i].classList.add('selected-note');
+        }
+      }
+    }
+
+    // Function to update the gain value
+    function updateGainValue() {
+      gainValue = parseFloat(document.getElementById('gainInput').value);
+    }
+
+    // Function to initialize the sequencer interface
+    function initializeSequencer() {
+      const noteContainer = document.getElementById('noteContainer');
+      for (let i = 0; i < noteSequence.length; i++) {
+        const noteElement = document.createElement('div');
+        noteElement.className = 'note';
+        noteElement.id = `note-${i}`;
+        noteElement.addEventListener('click', () => toggleNote(i));
+        noteContainer.appendChild(noteElement);
+      }
+
+      const stepButton = document.getElementById('stepButton');
+      stepButton.addEventListener('click', playFatBass);
+
+      const gainInput = document.getElementById('gainInput');
+      gainInput.addEventListener('input', () => {
+        updateGainValue();
+      });
+    }
+
+    // Initialize the sequencer interface
+    initializeSequencer();
+  </script>
+</body>
+</html>
